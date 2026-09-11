@@ -1,0 +1,15 @@
+# ESP-IDF specific files
+build/
+sdkconfig
+sdkconfig.old
+dependencies.lock
+.cache/
+
+# macOS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*~

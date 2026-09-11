@@ -1,0 +1,4 @@
+dependencies:
+  idf: ">=5.0"
+  espressif/mpu6050: "^1.2.0"
+  espressif/button: "^4.2.0"

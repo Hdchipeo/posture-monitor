@@ -1,0 +1,114 @@
+menu "Posture Monitor Configuration"
+
+    menu "Hardware Pin Assignment"
+        config POSTURE_I2C_SDA_GPIO
+            int "MPU6050 I2C SDA GPIO"
+            default 4
+            range 0 21
+            help
+                GPIO number assigned to the I2C Data Line (SDA).
+
+        config POSTURE_I2C_SCL_GPIO
+            int "MPU6050 I2C SCL GPIO"
+            default 5
+            range 0 21
+            help
+                GPIO number assigned to the I2C Clock Line (SCL).
+
+        config POSTURE_I2C_PORT_NUM
+            int "I2C Port Number"
+            default 0
+            range 0 0
+            help
+                ESP32-C3 has one I2C controller (Port 0).
+
+        config POSTURE_I2C_FREQ_HZ
+            int "I2C Clock Speed (Hz)"
+            default 400000
+            help
+                Bus clock speed in Hz (100000 for Standard Mode, 400000 for Fast Mode).
+
+        config POSTURE_VIBRATION_GPIO
+            int "Vibration Motor Drive GPIO"
+            default 6
+            range 0 21
+            help
+                GPIO output connected to the N-channel MOSFET gate controlling the vibration motor.
+
+        config POSTURE_BUZZER_GPIO
+            int "Buzzer Drive GPIO"
+            default 7
+            range 0 21
+            help
+                GPIO output connected to the buzzer switching circuit.
+
+        config POSTURE_BUTTON_GPIO
+            int "Calibration / Tare Button GPIO"
+            default 9
+            range 0 21
+            help
+                GPIO connected to the calibration pushbutton (active LOW with pull-up).
+    endmenu
+
+    menu "Algorithm & Signal Processing"
+        config POSTURE_SAMPLING_RATE_HZ
+            int "IMU Sampling Frequency (Hz)"
+            default 50
+            range 10 200
+            help
+                Rate at which the MPU6050 is polled and the complementary filter is updated.
+
+        config POSTURE_FILTER_ALPHA_X100
+            int "Complementary Filter Alpha (x100)"
+            default 96
+            range 50 99
+            help
+                Weight allocated to the gyroscope high-pass integration (e.g. 96 represents 0.96).
+                Accelerometer weight will be (100 - Alpha) / 100.
+
+        config POSTURE_ANGLE_THRESHOLD_DEG
+            int "Slouch Angle Threshold (Degrees)"
+            default 15
+            range 5 45
+            help
+                Angular deviation limit in degrees from calibrated baseline before triggering slouch detection.
+    endmenu
+
+    menu "Alert & Escalation Timers"
+        config POSTURE_SLOUCH_TOLERANCE_TIME_S
+            int "Slouch Grace Time before Level 1 Haptic Alert (Seconds)"
+            default 5
+            range 1 60
+            help
+                Duration in seconds that slouching must persist before triggering mild haptic pulses.
+
+        config POSTURE_ESCALATION_TIME_S
+            int "Escalation Delay before Level 2 Buzzer Alarm (Seconds)"
+            default 15
+            range 5 120
+            help
+                Time in seconds from initial Level 1 warning before escalating to combined vibration and audio alarm.
+
+        config POSTURE_ENABLE_BUZZER
+            bool "Enable Audible Buzzer Alerts"
+            default y
+            help
+                If disabled, the device will operate in silent haptic-only mode.
+    endmenu
+
+    menu "Storage & Calibration"
+        config POSTURE_NVS_NAMESPACE
+            string "NVS Namespace for Calibration Storage"
+            default "posture_cfg"
+            help
+                Namespace string used in Non-Volatile Storage (NVS).
+
+        config POSTURE_CALIBRATION_SAMPLES
+            int "Number of Samples for Zero-Reference Calibration"
+            default 100
+            range 20 500
+            help
+                Number of IMU readings averaged when computing the neutral posture baseline.
+    endmenu
+
+endmenu
