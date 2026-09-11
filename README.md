@@ -27,7 +27,7 @@
   |
   <a href="#7-getting-started--flashing">Getting Started</a>
   |
-  <a href="#8-verification--benchmarks">Verification</a>
+  <a href="arduino/posture_monitor/README_EN.md">Arduino IDE Version</a>
   |
   <a href="./README_VN.md">Tài Liệu Tiếng Việt</a>
 

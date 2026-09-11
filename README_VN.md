@@ -27,7 +27,7 @@
   |
   <a href="#7-hướng-dẫn-cài-đặt--nạp-firmware">Cài Đặt & Nạp</a>
   |
-  <a href="#8-kết-quả-đo-lường--kiểm-thử">Đo Lường Kiểm Thử</a>
+  <a href="arduino/posture_monitor/README_VN.md">Phiên Bản Arduino</a>
   |
   <a href="./README.md">English Documentation</a>
 
