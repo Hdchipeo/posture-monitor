@@ -14,11 +14,20 @@
 static const char *TAG = "MPU6050_SENSOR";
 
 #ifndef CONFIG_POSTURE_I2C_SDA_GPIO
-#define CONFIG_POSTURE_I2C_SDA_GPIO 4
+#define CONFIG_POSTURE_I2C_SDA_GPIO 21
 #endif
 
 #ifndef CONFIG_POSTURE_I2C_SCL_GPIO
-#define CONFIG_POSTURE_I2C_SCL_GPIO 5
+#define CONFIG_POSTURE_I2C_SCL_GPIO 22
+#endif
+
+#if CONFIG_IDF_TARGET_ESP32
+#if (CONFIG_POSTURE_I2C_SDA_GPIO >= 6 && CONFIG_POSTURE_I2C_SDA_GPIO <= 11)
+#error "CONFIG_POSTURE_I2C_SDA_GPIO cannot use GPIO 6-11 on ESP32! These pins are dedicated to SPI Flash."
+#endif
+#if (CONFIG_POSTURE_I2C_SCL_GPIO >= 6 && CONFIG_POSTURE_I2C_SCL_GPIO <= 11)
+#error "CONFIG_POSTURE_I2C_SCL_GPIO cannot use GPIO 6-11 on ESP32! These pins are dedicated to SPI Flash."
+#endif
 #endif
 
 #ifndef CONFIG_POSTURE_I2C_PORT_NUM
