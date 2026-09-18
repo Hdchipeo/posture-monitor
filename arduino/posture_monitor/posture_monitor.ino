@@ -90,10 +90,7 @@ void setup() {
 
     // 3. Sensor IMU
     if (!mpu.begin(PIN_I2C_SDA, PIN_I2C_SCL)) {
-        Serial.println(F("[FATAL] MPU6050 not detected! Halting. Check wiring & pull-ups."));
-        while (true) {
-            delay(1000);
-        }
+        Serial.println(F("[WARNING] MPU6050 not detected at startup. Will retry in background..."));
     }
 
     // 4. Core Algorithm & FSM
@@ -150,6 +147,17 @@ void loop() {
                         break;
                 }
             }
+        } else {
+            // Sensor offline: silence actuators for safety
+            actuator.setPattern(ALERT_IDLE);
+
+            // Attempt reconnection every 2 seconds if sensor not healthy
+            static uint32_t lastReconnectAttempt = 0;
+            if (!mpu.isHealthy() && (now - lastReconnectAttempt > 2000)) {
+                lastReconnectAttempt = now;
+                Serial.println(F("[Sensor] Attempting to reconnect MPU6050..."));
+                mpu.begin(PIN_I2C_SDA, PIN_I2C_SCL);
+            }
         }
     }
 
@@ -159,9 +167,13 @@ void loop() {
         Angles angles = core.getAngles();
         CalibrationData calib = core.getCalibration();
 
-        Serial.printf("[STATUS] Pitch: %6.1f deg (Delta: %5.1f) | Roll: %6.1f deg (Delta: %5.1f) | State: %d | FreeHeap: %u B\n",
-                      angles.pitch, angles.pitch - calib.pitchOffset,
-                      angles.roll, angles.roll - calib.rollOffset,
-                      core.getState(), (unsigned int)ESP.getFreeHeap());
+        if (mpu.isHealthy()) {
+            Serial.printf("[STATUS] Pitch: %6.1f° | Roll: %6.1f° | Dev: %5.1f° | Score: %2u | State: %d | FreeHeap: %u B\n",
+                          angles.pitch, angles.roll, core.getDeviation(), core.getPostureScore(),
+                          core.getState(), (unsigned int)ESP.getFreeHeap());
+        } else {
+            Serial.printf("[STATUS] SENSOR OFFLINE (Check SDA=%d, SCL=%d) | State: %d | FreeHeap: %u B\n",
+                          PIN_I2C_SDA, PIN_I2C_SCL, core.getState(), (unsigned int)ESP.getFreeHeap());
+        }
     }
 }

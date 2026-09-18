@@ -40,6 +40,8 @@ public:
     void snooze(uint32_t seconds);
     PostureState getState() const;
     Angles getAngles() const;
+    float getDeviation() const;
+    uint8_t getPostureScore() const;
     CalibrationData getCalibration() const;
     void setCalibration(const CalibrationData &calib);
 

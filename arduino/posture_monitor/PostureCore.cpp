@@ -151,6 +151,19 @@ Angles PostureCore::getAngles() const {
     return _currentAngles;
 }
 
+float PostureCore::getDeviation() const {
+    float deltaPitch = fabsf(_currentAngles.pitch - _calib.pitchOffset);
+    float deltaRoll  = fabsf(_currentAngles.roll  - _calib.rollOffset);
+    return sqrtf(deltaPitch * deltaPitch + deltaRoll * deltaRoll);
+}
+
+uint8_t PostureCore::getPostureScore() const {
+    float dev = getDeviation();
+    float penalty = (dev / _calib.angleThreshold) * 45.0f;
+    if (penalty > 90.0f) penalty = 90.0f;
+    return (uint8_t)roundf(100.0f - penalty);
+}
+
 CalibrationData PostureCore::getCalibration() const {
     return _calib;
 }

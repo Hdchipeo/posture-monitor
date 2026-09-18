@@ -13,12 +13,16 @@
 #include "esp_log.h"
 #include "esp_system.h"
 #include "esp_timer.h"
+#include <math.h>
 
 #include "storage_manager.h"
 #include "actuator_manager.h"
 #include "mpu6050_sensor.h"
 #include "posture_core.h"
 #include "button_ctrl.h"
+#include "telemetry.h"
+#include "web_server.h"
+#include "wifi_manager.h"
 
 static const char *TAG = "POSTURE_MAIN";
 
@@ -92,49 +96,105 @@ static void posture_monitor_task(void *pvParameters) {
         // 1. Read IMU with motor vibration noise decoupling
         bool motor_active = actuator_manager_is_vibrating();
         esp_err_t err = mpu6050_sensor_update(dt, motor_active, &angles);
-        if (err != ESP_OK) {
-            ESP_LOGW(TAG, "Sensor update failed (code: %s), skipping step", esp_err_to_name(err));
-            continue;
+        bool sensor_ok = (err == ESP_OK);
+
+        if (!sensor_ok) {
+            static int64_t s_last_sensor_warn = 0;
+            int64_t now = esp_timer_get_time();
+            if (now - s_last_sensor_warn > 3000000LL) {
+                s_last_sensor_warn = now;
+                ESP_LOGW(TAG, "Sensor update failed (code: %s). Check MPU6050 wiring (SDA=GPIO 8, SCL=GPIO 9, 3.3V).", esp_err_to_name(err));
+            }
         }
 
-        // 2. Handle calibration state if active
-        if (posture_core_is_calibrating()) {
+        // 2. Handle calibration state if active (only if sensor healthy)
+        if (sensor_ok && posture_core_is_calibrating()) {
             posture_calib_data_t completed_calib;
             esp_err_t calib_status = posture_core_add_calibration_sample(&angles, &completed_calib);
             if (calib_status == ESP_OK) {
                 // Calibration just finished: persist to NVS flash
                 storage_manager_save_calibration(&completed_calib);
                 actuator_manager_set_pattern(ALERT_PATTERN_CALIB_DONE);
+                telemetry_record_event("calib", "Tare Calibrated", "Neutral zero baseline saved to NVS");
                 ESP_LOGI(TAG, "Calibration stored to NVS: Pitch=%.2f deg, Roll=%.2f deg",
                          completed_calib.pitch_offset, completed_calib.roll_offset);
             }
-            continue;
+        } else if (sensor_ok) {
+            // 3. Process posture evaluation FSM
+            posture_fsm_state_t prev_state = fsm_state;
+            posture_core_process_sample(dt, &angles, &fsm_state);
+
+            // Record posture transition events
+            if (fsm_state != prev_state) {
+                if (fsm_state == POSTURE_STATE_ALERT_L1) {
+                    telemetry_record_event("warn", "Slouch Warning L1", "Haptic pulse active");
+                } else if (fsm_state == POSTURE_STATE_ALERT_L2) {
+                    telemetry_record_event("alert", "Slouch Alert L2", "Persistent slouch - Alarm active");
+                } else if (fsm_state == POSTURE_STATE_GOOD &&
+                           (prev_state == POSTURE_STATE_ALERT_L1 || prev_state == POSTURE_STATE_ALERT_L2 || prev_state == POSTURE_STATE_SUSPECTED_SLOUCH)) {
+                    telemetry_record_event("good", "Posture Corrected", "Returned to neutral alignment");
+                }
+            }
+
+            // 4. Update actuator patterns based on FSM state
+            switch (fsm_state) {
+                case POSTURE_STATE_GOOD:
+                case POSTURE_STATE_SUSPECTED_SLOUCH:
+                case POSTURE_STATE_SNOOZED:
+                    actuator_manager_set_pattern(ALERT_PATTERN_IDLE);
+                    break;
+
+                case POSTURE_STATE_ALERT_L1:
+                    actuator_manager_set_pattern(ALERT_PATTERN_LEVEL1_HAPTIC);
+                    break;
+
+                case POSTURE_STATE_ALERT_L2:
+                    actuator_manager_set_pattern(ALERT_PATTERN_LEVEL2_ALARM);
+                    break;
+
+                default:
+                    break;
+            }
+        } else {
+            // Sensor offline: silence vibration/buzzer for safety
+            actuator_manager_set_pattern(ALERT_PATTERN_IDLE);
         }
 
-        // 3. Process posture evaluation FSM
-        posture_core_process_sample(dt, &angles, &fsm_state);
+        // 5. Broadcast real-time telemetry snapshot to WebSocket clients at 10 Hz (every 5 sensor samples)
+        static uint32_t telem_stream_counter = 0;
+        telem_stream_counter++;
+        if (telem_stream_counter >= (CONFIG_POSTURE_SAMPLING_RATE_HZ / 10)) {
+            telem_stream_counter = 0;
+            posture_calib_data_t active_calib;
+            posture_core_get_calib(&active_calib);
+            float d_pitch = fabsf(angles.pitch - active_calib.pitch_offset);
+            float d_roll  = fabsf(angles.roll  - active_calib.roll_offset);
+            float dev     = sqrtf(d_pitch * d_pitch + d_roll * d_roll);
 
-        // 4. Update actuator patterns based on FSM state
-        switch (fsm_state) {
-            case POSTURE_STATE_GOOD:
-            case POSTURE_STATE_SUSPECTED_SLOUCH:
-            case POSTURE_STATE_SNOOZED:
-                actuator_manager_set_pattern(ALERT_PATTERN_IDLE);
-                break;
+            posture_telemetry_t telem = {
+                .timestamp_ms = esp_timer_get_time() / 1000ULL,
+                .state = fsm_state,
+                .pitch = angles.pitch,
+                .roll = angles.roll,
+                .pitch_error = d_pitch,
+                .roll_error = d_roll,
+                .deviation = dev,
+                .threshold = active_calib.angle_threshold,
+                .alert_level = (fsm_state == POSTURE_STATE_ALERT_L2) ? 2 : ((fsm_state == POSTURE_STATE_ALERT_L1) ? 1 : 0),
+                .is_calibrating = posture_core_is_calibrating(),
+                .is_snoozed = (fsm_state == POSTURE_STATE_SNOOZED),
+                .sensor_ok = sensor_ok,
+                .battery_pct = 92,
+                .wifi_rssi = wifi_manager_get_rssi(),
+                .free_heap = (uint32_t)esp_get_free_heap_size(),
+                .uptime_s = (uint32_t)(esp_timer_get_time() / 1000000ULL)
+            };
 
-            case POSTURE_STATE_ALERT_L1:
-                actuator_manager_set_pattern(ALERT_PATTERN_LEVEL1_HAPTIC);
-                break;
-
-            case POSTURE_STATE_ALERT_L2:
-                actuator_manager_set_pattern(ALERT_PATTERN_LEVEL2_ALARM);
-                break;
-
-            default:
-                break;
+            telemetry_update_snapshot(&telem);
+            web_server_broadcast_telemetry(&telem);
         }
 
-        // 5. Periodic telemetry log (every 5 seconds)
+        // 6. Periodic telemetry log (every 5 seconds)
         report_counter++;
         if (report_counter >= (CONFIG_POSTURE_SAMPLING_RATE_HZ * 5)) {
             report_counter = 0;
@@ -180,9 +240,14 @@ void app_main(void) {
     // 6. Initialize Button Controller
     ESP_ERROR_CHECK(button_ctrl_init(on_button_action, NULL));
 
-    // 7. Launch main posture monitoring task
-    // Stack: 3584 bytes, Priority: 5
-    xTaskCreatePinnedToCore(posture_monitor_task, "posture_task", 3584, NULL, 5, NULL, 0);
+    // 7. Initialize Telemetry, Wi-Fi SoftAP and Web Server
+    ESP_ERROR_CHECK(telemetry_init());
+    ESP_ERROR_CHECK(wifi_manager_init_softap());
+    ESP_ERROR_CHECK(web_server_start());
 
-    ESP_LOGI(TAG, "System operational. Press and hold button (>2s) to Tare calibration.");
+    // 8. Launch main posture monitoring task
+    // Stack: 4096 bytes, Priority: 5
+    xTaskCreatePinnedToCore(posture_monitor_task, "posture_task", 4096, NULL, 5, NULL, 0);
+
+    ESP_LOGI(TAG, "System operational. Connect phone to 'Posture-Monitor-AP' and visit http://192.168.4.1");
 }

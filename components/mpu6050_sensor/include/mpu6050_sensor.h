@@ -40,6 +40,13 @@ esp_err_t mpu6050_sensor_init(void);
 esp_err_t mpu6050_sensor_update(float dt, bool freeze_accel_bias, posture_angles_t *out_angles);
 
 /**
+ * @brief Check if MPU6050 communication is currently active and healthy.
+ *
+ * @return true if communicating without recent bus errors.
+ */
+bool mpu6050_sensor_is_healthy(void);
+
+/**
  * @brief Hardware deinit / put sensor to low-power sleep mode.
  *
  * @return ESP_OK on success.

@@ -9,6 +9,7 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "esp_rom_sys.h"
+#include "esp_timer.h"
 #include <math.h>
 
 static const char *TAG = "MPU6050_SENSOR";
@@ -48,6 +49,9 @@ static mpu6050_handle_t s_mpu6050_handle = NULL;
 static float s_pitch = 0.0f;
 static float s_roll = 0.0f;
 static bool s_filter_initialized = false;
+static bool s_is_healthy = false;
+static uint32_t s_consecutive_failures = 0;
+static int64_t s_last_recovery_time = 0;
 
 /**
  * @brief Clock 9 pulses on SCL if SDA is stuck LOW to release hung I2C bus.
@@ -135,6 +139,8 @@ esp_err_t mpu6050_sensor_init(void) {
     }
 
     s_filter_initialized = false;
+    s_is_healthy = true;
+    s_consecutive_failures = 0;
     ESP_LOGI(TAG, "MPU6050 sensor successfully configured (I2C SDA: %d, SCL: %d, Freq: %d Hz)",
              CONFIG_POSTURE_I2C_SDA_GPIO, CONFIG_POSTURE_I2C_SCL_GPIO, CONFIG_POSTURE_I2C_FREQ_HZ);
     return ESP_OK;
@@ -147,10 +153,29 @@ esp_err_t mpu6050_sensor_update(float dt, bool freeze_accel_bias, posture_angles
     mpu6050_gyro_value_t gyro;
 
     esp_err_t err = mpu6050_get_acce(s_mpu6050_handle, &acce);
-    if (err != ESP_OK) return err;
+    if (err == ESP_OK) {
+        err = mpu6050_get_gyro(s_mpu6050_handle, &gyro);
+    }
 
-    err = mpu6050_get_gyro(s_mpu6050_handle, &gyro);
-    if (err != ESP_OK) return err;
+    if (err != ESP_OK) {
+        s_consecutive_failures++;
+        s_is_healthy = false;
+        int64_t now = esp_timer_get_time();
+        if (s_consecutive_failures >= 10 && (now - s_last_recovery_time > 2000000LL)) {
+            s_last_recovery_time = now;
+            ESP_LOGW(TAG, "MPU6050 I2C communication stalled (%lu errors). Attempting recovery...",
+                     (unsigned long)s_consecutive_failures);
+            if (mpu6050_sensor_init() == ESP_OK) {
+                ESP_LOGI(TAG, "MPU6050 recovered and re-initialized successfully!");
+                s_consecutive_failures = 0;
+                s_is_healthy = true;
+            }
+        }
+        return err;
+    }
+
+    s_consecutive_failures = 0;
+    s_is_healthy = true;
 
     // Convert raw measurements to physical angles
     // acce values are in g (where 1.0 = 1g)
@@ -188,6 +213,10 @@ esp_err_t mpu6050_sensor_update(float dt, bool freeze_accel_bias, posture_angles
     out_angles->yaw_rate = gz;
 
     return ESP_OK;
+}
+
+bool mpu6050_sensor_is_healthy(void) {
+    return s_is_healthy;
 }
 
 esp_err_t mpu6050_sensor_sleep(void) {

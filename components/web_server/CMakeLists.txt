@@ -1,0 +1,24 @@
+idf_component_register(
+    SRCS
+        "src/web_server.c"
+        "src/wifi_manager.c"
+        "src/dns_server.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        esp_http_server
+        esp_wifi
+        esp_netif
+        esp_event
+        telemetry
+        posture_core
+        storage_manager
+        actuator_manager
+        json
+        lwip
+    EMBED_FILES
+        "../../web/index.html"
+        "../../web/style.css"
+        "../../web/app.js"
+        "../../web/chart.js"
+)

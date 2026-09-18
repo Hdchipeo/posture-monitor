@@ -34,9 +34,14 @@ Hệ thống tự động nhận diện loại chip khi chọn board trong Ardui
    - Nếu dùng ESP32-C3: Chọn **ESP32C3 Dev Module**.
 3. Chọn cổng COM/Serial tại **Tools -> Port**.
 4. Nhấn nút **Upload** (Ctrl+U / Cmd+U) để nạp.
-5. Mở **Serial Monitor** ở tốc độ **115200 baud** để xem dữ liệu góc nghiêng và trạng thái.
+5. Mở **Serial Monitor** ở tốc độ **115200 baud** để xem dữ liệu góc nghiêng, độ lệch Euclidean, điểm tư thế (0-100) và trạng thái.
 
 ## 4. Hướng Dẫn Thao Tác Nút Bấm
 - **Nhấn giữ > 2 giây**: Thiết bị rung 1 nhịp bắt đầu cân chỉnh tư thế ngồi chuẩn (Tare). Ngồi thẳng lưng trong 2 giây, thiết bị rung 2 nhịp xác nhận hoàn tất và lưu vào Flash NVS.
 - **Nhấn đúp (2 lần liên tiếp)**: Tạm dừng cảnh báo trong 10 phút (Snooze) khi cần đứng dậy hoặc tập thể dục.
 - **Nhấn đơn (1 lần)**: Tắt nhanh cảnh báo đang rung/kêu.
+
+## 5. Tính Năng Chống Lỗi Tự Động (Fault Tolerance)
+- **Tự động un-wedge I2C bus**: Khi dây SDA/SCL bị nhiễu hoặc ngắt kết nối, driver phát 9 xung xung nhịp SCL để mở khóa bus I2C.
+- **Khởi động không chặn (Non-blocking Boot)**: Nếu cảm biến chưa cắm lúc bật nguồn, hệ thống không bị treo mà liên tục thử kết nối lại ngầm mỗi 2 giây.
+- **Tự động ngắt cơ cấu chấp hành**: Khi cảm biến ngoại tuyến, motor rung và còi chip được tự động ngắt để bảo vệ an toàn.

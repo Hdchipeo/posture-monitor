@@ -59,7 +59,7 @@ menu "Posture Monitor Configuration"
         config POSTURE_BUTTON_GPIO
             int "Calibration / Tare Button GPIO"
             default 0 if IDF_TARGET_ESP32
-            default 9 if IDF_TARGET_ESP32C3
+            default 0 if IDF_TARGET_ESP32C3
             default 0
             range 0 39
             help

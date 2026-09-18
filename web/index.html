@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Posture Monitor</title>
+  <meta name="description" content="Apple-style real-time mobile posture monitor dashboard for ESP32-C3">
+  <meta name="theme-color" content="#F5F5F7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    window.onerror = function(msg, url, line) {
+      var d = document.createElement('div');
+      d.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#FF3B30;color:white;padding:14px;z-index:99999;font-size:13px;font-weight:600;text-align:center;';
+      d.textContent = 'JS Error: ' + msg + ' (Line ' + line + ')';
+      document.body ? document.body.appendChild(d) : window.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(d); });
+    };
+  </script>
+</head>
+<body>
+  <!-- Connection / Simulation Status Bar -->
+  <header class="status-banner" id="statusBanner">
+    <div class="banner-pill" id="connPill">
+      <span class="status-dot" id="connDot"></span>
+      <span id="connText" data-i18n="conn_connecting">Connecting...</span>
+    </div>
+    <div class="header-right-controls">
+      <div class="lang-selector" id="langSelector" role="group" aria-label="Language selection">
+        <button type="button" class="lang-btn active" id="btnLangEn" data-lang="en">EN</button>
+        <button type="button" class="lang-btn" id="btnLangVi" data-lang="vi">VI</button>
+      </div>
+      <div class="sim-toggle-wrapper">
+        <label class="toggle-switch">
+          <input type="checkbox" id="simToggle" autocomplete="off">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="sim-label" data-i18n="demo_mode">Demo</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container (Mobile Max-Width: 680px) -->
+  <main class="container">
+
+    <!-- ================================================================= -->
+    <!-- TAB 1: TODAY (DEFAULT)                                            -->
+    <!-- ================================================================= -->
+    <section id="tab-today" class="tab-pane active" aria-labelledby="nav-today">
+      <div class="page-header">
+        <span class="header-eyebrow" id="todayDate">Thursday, September 17</span>
+        <h1 class="header-title" data-i18n="nav_posture">Posture</h1>
+      </div>
+
+      <!-- Sensor Hardware Status Alert (Shows if I2C/Sensor fails) -->
+      <div class="sensor-alert-banner" id="sensorAlertBanner" style="display: none;">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <span id="sensorAlertText" data-i18n="sensor_alert">MPU6050 Disconnected! Check I2C wiring: SDA=GPIO 8, SCL=GPIO 9, 3.3V</span>
+      </div>
+
+      <!-- Hero Posture State Card -->
+      <div class="card hero-card" id="heroCard">
+        <div class="state-badge-container">
+          <div class="state-dot" id="stateDot"></div>
+          <div class="state-title" id="stateTitle">GOOD</div>
+          <div class="state-subtitle" id="stateSubtitle">You're sitting upright</div>
+        </div>
+
+        <div class="score-display">
+          <div class="score-value" id="scoreValue">95</div>
+          <div class="score-label" data-i18n="score_label">POSTURE SCORE</div>
+        </div>
+
+        <div class="hero-actions">
+          <button class="btn btn-secondary" id="quickSnoozeBtn" type="button">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            <span id="snoozeBtnText" data-i18n="btn_snooze">Snooze 10m</span>
+          </button>
+          <button class="btn btn-primary" id="openCalibModalBtn" type="button">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span data-i18n="btn_calibrate">Tare Calibrate</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Today's Summary Metrics Card -->
+      <div class="card metrics-card">
+        <div class="card-header-row">
+          <h2 class="card-title" data-i18n="summary_title">Today's Summary</h2>
+          <span class="card-tag" id="sessionTimeTag">02h 45m monitored</span>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-item">
+            <span class="metric-label" data-i18n="good_posture">Good Posture</span>
+            <span class="metric-val" id="goodPosturePct">89%</span>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="goodPostureFill" style="width: 89%;"></div>
+            </div>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label" data-i18n="avg_deviation">Avg. Deviation</span>
+            <span class="metric-val" id="avgDevVal">3.8°</span>
+            <span class="metric-sub" data-i18n="target_dev">Target &lt; 15.0°</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label" data-i18n="alerts">Alerts</span>
+            <span class="metric-val" id="alertCountVal">3</span>
+            <span class="metric-sub"><span data-i18n="escalations">Escalations:</span> <strong id="l2CountVal">1</strong></span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label" data-i18n="longest_streak">Longest Streak</span>
+            <span class="metric-val" id="longestStreakVal">42m</span>
+            <span class="metric-sub" data-i18n="without_slouching">Without slouching</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Posture Vector & Angles Card -->
+      <div class="card live-vector-card">
+        <div class="card-header-row">
+          <h2 class="card-title" data-i18n="live_orientation">Live Orientation</h2>
+          <span class="badge live-badge">LIVE 10Hz</span>
+        </div>
+
+        <div class="vector-content-grid">
+          <!-- 2D Silhouette / Posture Mannequin -->
+          <div class="silhouette-container">
+            <svg id="postureSilhouette" viewBox="0 0 160 200" class="mannequin-svg" aria-label="Spine posture orientation visualizer">
+              <!-- Baseline Reference (Faint Gray) -->
+              <path d="M 80 160 C 80 120, 80 90, 80 50" stroke="#E5E5E7" stroke-width="6" stroke-linecap="round" fill="none" stroke-dasharray="4 4" />
+              <circle cx="80" cy="30" r="16" fill="#E5E5E7" />
+
+              <!-- Live Spine (Animated by Pitch & Roll tilt) -->
+              <g id="liveBodyGroup">
+                <path id="spineCurve" d="M 80 160 C 80 120, 80 90, 80 50" stroke="#1D1D1F" stroke-width="7" stroke-linecap="round" fill="none" />
+                <circle id="headCircle" cx="80" cy="30" r="16" fill="#1D1D1F" />
+                <!-- Sensor Tag Marker on Upper Back -->
+                <rect id="sensorTag" x="73" y="65" width="14" height="10" rx="3" fill="#34C759" />
+              </g>
+
+              <!-- Base Pedestal -->
+              <ellipse cx="80" cy="175" rx="35" ry="6" fill="#E5E5E7" />
+            </svg>
+            <div class="vector-caption" id="vectorCaption">Spine angle aligned</div>
+          </div>
+
+          <!-- Angle Readouts -->
+          <div class="angles-table">
+            <div class="angle-row">
+              <span class="angle-name" data-i18n="pitch_label">Pitch (Lean)</span>
+              <span class="angle-number" id="livePitch">+2.1°</span>
+            </div>
+            <div class="angle-row">
+              <span class="angle-name" data-i18n="roll_label">Roll (Tilt)</span>
+              <span class="angle-number" id="liveRoll">-0.8°</span>
+            </div>
+            <div class="angle-row highlight">
+              <span class="angle-name" data-i18n="total_deviation">Total Deviation</span>
+              <span class="angle-number" id="liveDeviation">2.2°</span>
+            </div>
+            <div class="angle-row">
+              <span class="angle-name" data-i18n="threshold">Threshold</span>
+              <span class="angle-number secondary" id="liveThreshold">15.0°</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-Time Chart Card -->
+      <div class="card chart-card">
+        <div class="card-header-row">
+          <div>
+            <h2 class="card-title" data-i18n="chart_title">Real-Time Deviation</h2>
+            <p class="chart-subtitle" data-i18n="chart_subtitle">Last 30 seconds of posture activity</p>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-chip"><span class="legend-line dev-line"></span> <span data-i18n="legend_dev">Deviation</span></span>
+            <span class="legend-chip"><span class="legend-line thresh-line"></span> <span data-i18n="legend_thresh">Threshold</span></span>
+          </div>
+        </div>
+        <div class="canvas-container">
+          <canvas id="realtimeChart" width="600" height="220"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: HISTORY & ANALYTICS                                        -->
+    <!-- ================================================================= -->
+    <section id="tab-history" class="tab-pane" aria-labelledby="nav-history">
+      <div class="page-header">
+        <span class="header-eyebrow" data-i18n="eyebrow_analytics">Analytics</span>
+        <h1 class="header-title" data-i18n="nav_history">History</h1>
+      </div>
+
+      <!-- Posture Hourly Distribution Heatmap -->
+      <div class="card">
+        <div class="card-header-row">
+          <h2 class="card-title" data-i18n="hourly_quality">Hourly Posture Quality</h2>
+          <span class="card-tag" data-i18n="session_tag">8h Session</span>
+        </div>
+        <p class="chart-subtitle" data-i18n="hourly_subtitle">Timeline breakdown throughout the day</p>
+        
+        <div class="heatmap-container" id="hourlyHeatmap">
+          <!-- Filled dynamically by JavaScript -->
+        </div>
+
+        <div class="heatmap-legend">
+          <span class="heatmap-key"><span class="key-box good-box"></span> <span data-i18n="key_good">&gt;85% Good</span></span>
+          <span class="heatmap-key"><span class="key-box warn-box"></span> <span data-i18n="key_slouch">Slouching</span></span>
+          <span class="heatmap-key"><span class="key-box alert-box"></span> <span data-i18n="key_alert">Alert Active</span></span>
+        </div>
+      </div>
+
+      <!-- Session Breakdown Stats -->
+      <div class="card">
+        <h2 class="card-title" data-i18n="breakdown_title">Session Breakdown</h2>
+        <div class="breakdown-list">
+          <div class="breakdown-item">
+            <div class="breakdown-bar-row">
+              <span data-i18n="good_posture">Good Posture</span>
+              <strong id="histGoodPct">89%</strong>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill good-fill" style="width: 89%;"></div>
+            </div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-bar-row">
+              <span data-i18n="suspected_slouch">Suspected Slouch</span>
+              <strong id="histSlouchPct">8%</strong>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill warn-fill" style="width: 8%;"></div>
+            </div>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-bar-row">
+              <span data-i18n="alert_state">Alert State</span>
+              <strong id="histAlertPct">3%</strong>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill danger-fill" style="width: 3%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chronological Event Timeline -->
+      <div class="card">
+        <div class="card-header-row">
+          <h2 class="card-title" data-i18n="event_timeline">Event Timeline</h2>
+          <button class="btn-text" id="exportCsvBtn" type="button" data-i18n="export_csv">Export CSV</button>
+        </div>
+        <div class="timeline-list" id="timelineList">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 3: DEVICE & SETTINGS                                          -->
+    <!-- ================================================================= -->
+    <section id="tab-device" class="tab-pane" aria-labelledby="nav-device">
+      <div class="page-header">
+        <span class="header-eyebrow" data-i18n="eyebrow_system">Hardware &amp; System</span>
+        <h1 class="header-title" data-i18n="nav_device">Device</h1>
+      </div>
+
+      <!-- Device Hardware Status Card -->
+      <div class="card device-info-card">
+        <div class="card-header-row">
+          <div class="device-title-wrap">
+            <div class="device-avatar">ESP</div>
+            <div>
+              <h2 class="device-name">Posture Monitor C3</h2>
+              <span class="device-subtitle" id="deviceSubStatus" data-i18n="connected_wifi">Connected via Wi-Fi</span>
+            </div>
+          </div>
+          <span class="badge" id="firmwareVerBadge">v1.0</span>
+        </div>
+
+        <div class="device-specs-grid">
+          <div class="spec-cell">
+            <span class="spec-label" data-i18n="spec_battery">Battery</span>
+            <span class="spec-value" id="devBattery">92%</span>
+          </div>
+          <div class="spec-cell">
+            <span class="spec-label" data-i18n="spec_wifi">Wi-Fi RSSI</span>
+            <span class="spec-value" id="devRssi">-52 dBm</span>
+          </div>
+          <div class="spec-cell">
+            <span class="spec-label" data-i18n="spec_uptime">Uptime</span>
+            <span class="spec-value" id="devUptime">02h 45m</span>
+          </div>
+          <div class="spec-cell">
+            <span class="spec-label" data-i18n="spec_heap">Free Heap</span>
+            <span class="spec-value" id="devHeap">184 KB</span>
+          </div>
+          <div class="spec-cell">
+            <span class="spec-label" data-i18n="spec_sensor">Sensor</span>
+            <span class="spec-value" id="devSensorStatus">MPU6050 (50Hz)</span>
+          </div>
+          <div class="spec-cell">
+            <span class="spec-label" data-i18n="spec_rate">Stream Rate</span>
+            <span class="spec-value">10 Hz (WS)</span>
+          </div>
+        </div>
+
+        <div class="device-calib-action">
+          <div>
+            <div class="setting-title" data-i18n="baseline_title">Neutral Posture Baseline</div>
+            <div class="setting-desc" id="currentBaselineDesc">Pitch: +1.2° | Roll: -0.4°</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="recalibBtn" type="button" data-i18n="btn_calibrate">Calibrate</button>
+        </div>
+      </div>
+
+      <!-- iOS Grouped Settings: Posture Thresholds -->
+      <div class="settings-group-header" data-i18n="group_thresholds">POSTURE THRESHOLDS</div>
+      <div class="card settings-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="threshSlider" class="setting-title" data-i18n="setting_dev_title">Deviation Threshold</label>
+            <span class="setting-desc" data-i18n="setting_dev_desc">Trigger angle deviation limit</span>
+          </div>
+          <div class="setting-control slider-control">
+            <input type="range" id="threshSlider" min="5" max="35" step="1" value="15">
+            <span class="slider-val" id="threshValLabel">15°</span>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="slouchDelayInput" class="setting-title" data-i18n="setting_slouch_title">Slouch Grace Period</label>
+            <span class="setting-desc" data-i18n="setting_slouch_desc">Delay before Level 1 haptic warning</span>
+          </div>
+          <div class="setting-control num-control">
+            <input type="number" id="slouchDelayInput" min="1" max="60" value="5">
+            <span class="unit-label" data-i18n="unit_sec">sec</span>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="escalationDelayInput" class="setting-title" data-i18n="setting_esc_title">Escalation Delay</label>
+            <span class="setting-desc" data-i18n="setting_esc_desc">Delay before Level 2 buzzer alarm</span>
+          </div>
+          <div class="setting-control num-control">
+            <input type="number" id="escalationDelayInput" min="5" max="120" value="15">
+            <span class="unit-label" data-i18n="unit_sec">sec</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- iOS Grouped Settings: Alerts -->
+      <div class="settings-group-header" data-i18n="group_feedback">ALERT FEEDBACK</div>
+      <div class="card settings-card">
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title" data-i18n="setting_vib_title">Vibration Motor</span>
+            <span class="setting-desc" data-i18n="setting_vib_desc">Tactile haptic pulses on posture error</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="vibrationToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <span class="setting-title" data-i18n="setting_buz_title">Audible Buzzer</span>
+            <span class="setting-desc" data-i18n="setting_buz_desc">Chirps on persistent slouch (L2)</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="buzzerToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Settings Action Buttons -->
+      <div class="settings-actions">
+        <button class="btn btn-primary" id="saveConfigBtn" type="button" data-i18n="btn_save">Save to Device</button>
+        <button class="btn btn-secondary" id="resetConfigBtn" type="button" data-i18n="btn_reset">Reset Factory Defaults</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================================================================= -->
+  <!-- CALIBRATION MODAL / FULL-SCREEN FLOW                              -->
+  <!-- ================================================================= -->
+  <div class="modal-backdrop" id="calibModal" role="dialog" aria-modal="true" aria-labelledby="calibModalTitle">
+    <div class="modal-card">
+      <button class="modal-close" id="closeCalibModalBtn" aria-label="Close modal">&times;</button>
+      
+      <!-- Stage 1: Instructions -->
+      <div id="calibStage1" class="calib-stage active">
+        <div class="calib-icon-wrap">
+          <svg viewBox="0 0 80 80" class="calib-guide-svg">
+            <circle cx="40" cy="20" r="10" fill="#1D1D1F" />
+            <path d="M 40 32 L 40 65 M 30 45 L 50 45 M 32 75 L 40 65 L 48 75" stroke="#1D1D1F" stroke-width="4" stroke-linecap="round" fill="none" />
+          </svg>
+        </div>
+        <h3 class="modal-title" id="calibModalTitle" data-i18n="calib_title">Tare Calibration</h3>
+        <p class="modal-desc" data-i18n="calib_desc1">
+          Sit upright in your natural, comfortable posture with shoulders relaxed and chin level.
+        </p>
+        <div class="modal-instructions-box">
+          <div class="instruct-item">
+            <span class="step-num">1</span>
+            <span data-i18n="calib_step1">Align your back against your seat.</span>
+          </div>
+          <div class="instruct-item">
+            <span class="step-num">2</span>
+            <span data-i18n="calib_step2">Stay still for 3 seconds while sampling.</span>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" id="startCalibCycleBtn" type="button" data-i18n="btn_start_calib">Start Calibration</button>
+      </div>
+
+      <!-- Stage 2: Progress Countdown -->
+      <div id="calibStage2" class="calib-stage">
+        <div class="calib-countdown" id="calibCountdown">3.0s</div>
+        <h3 class="modal-title" data-i18n="calib_sampling_title">Sampling Baseline...</h3>
+        <p class="modal-desc" data-i18n="calib_sampling_desc">Keep completely still. Recording 100 IMU readings.</p>
+        <div class="calib-progress-track">
+          <div class="calib-progress-bar" id="calibProgressBar" style="width: 0%;"></div>
+        </div>
+        <div class="calib-current-angles">
+          <span>Pitch: <strong id="calibLivePitch">0.0°</strong></span>
+          <span>Roll: <strong id="calibLiveRoll">0.0°</strong></span>
+        </div>
+        <button class="btn btn-secondary btn-block" id="cancelCalibBtn" type="button" data-i18n="btn_cancel">Cancel</button>
+      </div>
+
+      <!-- Stage 3: Completed Result -->
+      <div id="calibStage3" class="calib-stage">
+        <div class="calib-success-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h3 class="modal-title" data-i18n="calib_complete_title">Calibration Complete</h3>
+        <p class="modal-desc" data-i18n="calib_complete_desc">Your neutral zero reference has been persisted to NVS flash memory.</p>
+        <div class="calib-result-box">
+          <div class="result-row">
+            <span data-i18n="calib_pitch_base">Pitch Baseline</span>
+            <strong id="calibResultPitch">+1.82°</strong>
+          </div>
+          <div class="result-row">
+            <span data-i18n="calib_roll_base">Roll Baseline</span>
+            <strong id="calibResultRoll">-0.43°</strong>
+          </div>
+          <div class="result-row">
+            <span data-i18n="calib_samples_avg">Samples Averaged</span>
+            <strong data-i18n="calib_samples_count">100 samples</strong>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" id="finishCalibBtn" type="button" data-i18n="btn_done">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MOBILE BOTTOM NAVIGATION (APPLE STYLE)                            -->
+  <!-- ================================================================= -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-today" data-tab="tab-today" type="button">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span class="nav-label" data-i18n="nav_today">Today</span>
+    </button>
+
+    <button class="nav-item" id="nav-history" data-tab="tab-history" type="button">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+      </svg>
+      <span class="nav-label" data-i18n="nav_history">History</span>
+    </button>
+
+    <button class="nav-item" id="nav-device" data-tab="tab-device" type="button">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+        <line x1="12" y1="18" x2="12.01" y2="18"></line>
+      </svg>
+      <span class="nav-label" data-i18n="nav_device">Device</span>
+    </button>
+  </nav>
+
+  <!-- Toast Notification Overlay -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <script src="chart.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

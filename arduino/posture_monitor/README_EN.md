@@ -34,9 +34,14 @@ The sketch automatically detects the active board target at compile time:
    - For ESP32-C3: **ESP32C3 Dev Module**
 3. Select your serial port in **Tools -> Port**.
 4. Click **Upload** (Ctrl+U / Cmd+U).
-5. Open Serial Monitor at **115200 baud**.
+5. Open Serial Monitor at **115200 baud** to monitor inclination angles, Euclidean deviation, score (0-100), and state.
 
 ## 4. User Interaction
 - **Hold Button > 2 seconds**: Initiates neutral posture calibration (Tare). The motor will buzz once at start and twice upon completion.
 - **Double Click Button**: Snoozes alerts for 10 minutes.
 - **Single Click**: Silences any currently sounding alert.
+
+## 5. Fault-Tolerant Features
+- **Automatic I2C Bus Recovery**: Un-wedges stuck SDA/SCL lines by pulsing SCL 9 times.
+- **Non-blocking Startup**: If MPU6050 is not plugged in on boot, system keeps running and retries connection in the background every 2s.
+- **Fail-safe Actuators**: Silences vibration motor and buzzer whenever sensor signal is lost.

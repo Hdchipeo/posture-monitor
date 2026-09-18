@@ -35,6 +35,11 @@ public:
     bool readRaw(RawIMUData &data);
 
     /**
+     * @brief Check if MPU6050 is actively communicating without bus faults.
+     */
+    bool isHealthy() const { return _isHealthy; }
+
+    /**
      * @brief Put the MPU6050 into low power sleep mode.
      */
     void sleep();
@@ -45,7 +50,14 @@ public:
     void wakeUp();
 
 private:
-    uint8_t _address;
+    uint8_t  _address;
+    int      _sdaPin;
+    int      _sclPin;
+    uint32_t _freqHz;
+    bool     _isHealthy;
+    uint32_t _consecutiveFailures;
+    uint32_t _lastRecoveryMs;
+
     void recoverBus(int sdaPin, int sclPin);
     bool writeRegister(uint8_t reg, uint8_t value);
     bool readRegisters(uint8_t startReg, uint8_t *buffer, size_t length);

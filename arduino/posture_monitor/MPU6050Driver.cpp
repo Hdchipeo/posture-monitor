@@ -13,7 +13,14 @@
 #define REG_PWR_MGMT_1   0x6B
 #define REG_WHO_AM_I     0x75
 
-MPU6050Driver::MPU6050Driver(uint8_t address) : _address(address) {}
+MPU6050Driver::MPU6050Driver(uint8_t address)
+    : _address(address),
+      _sdaPin(-1),
+      _sclPin(-1),
+      _freqHz(400000),
+      _isHealthy(false),
+      _consecutiveFailures(0),
+      _lastRecoveryMs(0) {}
 
 void MPU6050Driver::recoverBus(int sdaPin, int sclPin) {
     pinMode(sdaPin, INPUT_PULLUP);
@@ -40,6 +47,10 @@ void MPU6050Driver::recoverBus(int sdaPin, int sclPin) {
 }
 
 bool MPU6050Driver::begin(int sdaPin, int sclPin, uint32_t freqHz) {
+    _sdaPin = sdaPin;
+    _sclPin = sclPin;
+    _freqHz = freqHz;
+
     recoverBus(sdaPin, sclPin);
 
     Wire.begin(sdaPin, sclPin, freqHz);
@@ -48,6 +59,7 @@ bool MPU6050Driver::begin(int sdaPin, int sclPin, uint32_t freqHz) {
     uint8_t whoAmI = 0;
     if (!readRegisters(REG_WHO_AM_I, &whoAmI, 1) || whoAmI != 0x68) {
         Serial.printf("[MPU6050] Device check failed! WHO_AM_I returned: 0x%02X (Expected: 0x68)\n", whoAmI);
+        _isHealthy = false;
         return false;
     }
 
@@ -66,13 +78,34 @@ bool MPU6050Driver::begin(int sdaPin, int sclPin, uint32_t freqHz) {
     // 5. Accelerometer range: +/- 2g
     writeRegister(REG_ACCEL_CONFIG, 0x00);
 
+    _isHealthy = true;
+    _consecutiveFailures = 0;
     Serial.println(F("[MPU6050] Sensor initialized successfully (DLPF: 44Hz, +/-2g, +/-250dps)."));
     return true;
 }
 
 bool MPU6050Driver::readRaw(RawIMUData &data) {
     uint8_t buf[14];
-    if (!readRegisters(REG_ACCEL_XOUT_H, buf, 14)) return false;
+    if (!readRegisters(REG_ACCEL_XOUT_H, buf, 14)) {
+        _consecutiveFailures++;
+        _isHealthy = false;
+
+        uint32_t now = millis();
+        if (_consecutiveFailures >= 10 && (now - _lastRecoveryMs > 2000)) {
+            _lastRecoveryMs = now;
+            Serial.printf("[MPU6050] I2C bus stalled (%u consecutive errors). Attempting recovery...\n",
+                          (unsigned int)_consecutiveFailures);
+            if (begin(_sdaPin, _sclPin, _freqHz)) {
+                Serial.println(F("[MPU6050] Bus recovered and re-initialized!"));
+                _consecutiveFailures = 0;
+                _isHealthy = true;
+            }
+        }
+        return false;
+    }
+
+    _consecutiveFailures = 0;
+    _isHealthy = true;
 
     data.ax = (int16_t)((buf[0] << 8) | buf[1]);
     data.ay = (int16_t)((buf[2] << 8) | buf[3]);
