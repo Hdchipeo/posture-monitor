@@ -11,7 +11,7 @@
 
 PostureCore::PostureCore()
     : _state(STATE_GOOD),
-      _currentAngles{0.0f, 0.0f},
+      _currentAngles{0.0f, 0.0f, 0.0f},
       _filterInitialized(false),
       _slouchTimer(0.0f),
       _snoozeTimer(0.0f),
@@ -26,8 +26,14 @@ void PostureCore::begin(const CalibrationData &calib) {
     _state = STATE_GOOD;
     _slouchTimer = 0.0f;
     _snoozeTimer = 0.0f;
+    _currentAngles = {0.0f, 0.0f, 0.0f};
     _filterInitialized = false;
     _isCalibrating = false;
+}
+
+void PostureCore::resetYaw() {
+    _currentAngles.yaw = 0.0f;
+    Serial.println(F("[PostureCore] Yaw heading reset to 0.0 deg"));
 }
 
 void PostureCore::updateFilter(const RawIMUData &raw, float dt, bool isVibrating) {
@@ -39,24 +45,42 @@ void PostureCore::updateFilter(const RawIMUData &raw, float dt, bool isVibrating
     // Gyroscope: +/- 250 dps scale -> 131.0 LSB/(deg/s)
     float gx = (float)raw.gx / 131.0f;
     float gy = (float)raw.gy / 131.0f;
+    float gz = (float)raw.gz / 131.0f;
 
+    // Physical Angle Mapping (X along thoracic spine, Y across shoulders, Z normal to back):
+    // - Cúi / Ngửa (Flexion/Extension): Changes az & ax -> Roll = atan2(az, ax) (0 deg upright, + forward)
+    // - Nghiêng (Lateral Tilt): Changes ay -> Pitch = atan2(ay, sqrt(ax^2 + az^2))
+    float rollAcc  = atan2f(az, ax) * RAD_TO_DEG_F;
     float pitchAcc = atan2f(ay, sqrtf(ax * ax + az * az)) * RAD_TO_DEG_F;
-    float rollAcc  = atan2f(-ax, az) * RAD_TO_DEG_F;
 
     if (!_filterInitialized) {
+        _currentAngles.roll  = rollAcc;
         _currentAngles.pitch = pitchAcc;
-        _currentAngles.roll = rollAcc;
+        _currentAngles.yaw   = 0.0f;
         _filterInitialized = true;
     } else {
         if (isVibrating) {
             // Freeze accelerometer gravity update during active vibration to decouple acoustic noise
-            _currentAngles.pitch += gx * dt;
             _currentAngles.roll  += gy * dt;
+            _currentAngles.pitch += gx * dt;
         } else {
-            _currentAngles.pitch = COMPLEMENTARY_ALPHA * (_currentAngles.pitch + gx * dt) + (1.0f - COMPLEMENTARY_ALPHA) * pitchAcc;
             _currentAngles.roll  = COMPLEMENTARY_ALPHA * (_currentAngles.roll  + gy * dt) + (1.0f - COMPLEMENTARY_ALPHA) * rollAcc;
+            _currentAngles.pitch = COMPLEMENTARY_ALPHA * (_currentAngles.pitch + gx * dt) + (1.0f - COMPLEMENTARY_ALPHA) * pitchAcc;
         }
     }
+
+    // Compute axial Yaw rate by projecting gyro vector onto gravity vector (orthogonal to Earth)
+    float normA = sqrtf(ax * ax + ay * ay + az * az);
+    float yawRate = (normA > 0.1f) ? ((ax * gx + ay * gy + az * gz) / normA) : gx;
+
+    // Deadband threshold to eliminate stationary sensor drift
+    if (fabsf(yawRate) > 0.35f) {
+        _currentAngles.yaw += yawRate * dt;
+    }
+
+    // Wrap yaw to [-180, +180] degrees
+    if (_currentAngles.yaw > 180.0f) _currentAngles.yaw -= 360.0f;
+    else if (_currentAngles.yaw < -180.0f) _currentAngles.yaw += 360.0f;
 }
 
 void PostureCore::startCalibration(uint16_t sampleCount) {
@@ -86,6 +110,7 @@ bool PostureCore::feedCalibrationSample(CalibrationData &outCalib) {
         _isCalibrating = false;
         _state = STATE_GOOD;
         _slouchTimer = 0.0f;
+        resetYaw();
 
         outCalib = _calib;
         Serial.printf("[PostureCore] Calibration complete: Base Pitch=%.2f, Base Roll=%.2f\n",

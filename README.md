@@ -21,17 +21,23 @@
   |
   <a href="#4-software-architecture--component-structure">Software Architecture</a>
   |
-  <a href="#5-finite-state-machine--alert-escalation">State Machine</a>
-  |
-  <a href="#6-configuration--menuconfig">Configuration</a>
-  |
-  <a href="#7-getting-started--flashing">Getting Started</a>
-  |
   <a href="arduino/posture_monitor/README_EN.md">Arduino IDE Version</a>
   |
   <a href="./README_VN.md">Tài Liệu Tiếng Việt</a>
 
 </div>
+
+---
+
+> ### 📚 IN-DEPTH TECHNICAL DOCUMENTATION
+> 1. **Software Architecture & Program Flow**: [`docs/software_architecture.md`](docs/software_architecture.md)  
+>    *Layered architecture, 6-state FSM, sequence diagram, dual-OTA anti-bricking, web monitor engine.*
+> 2. **Hardware Schematic & Wiring Guide**: [`docs/hardware_schematic.md`](docs/hardware_schematic.md)  
+>    *Block diagram, detailed schematics, pinout mapping (ESP32-C3 & Classic), MOSFET/BJT/diode circuits.*
+> 3. **Theoretical Basis & Mathematical Derivation**: [`docs/theoretical_basis.md`](docs/theoretical_basis.md)  
+>    *Spinal biomechanics, co-phase derivative proof $\frac{d\theta}{dt} = +g_y$, relative Yaw extraction, 3D kinematics.*
+> 4. **User & Operation Manual**: [`docs/user_manual.md`](docs/user_manual.md)  
+>    *Medical wearing guide, diagnostic LED codes, physical button gestures, Wi-Fi Web Monitor & OTA guide.*
 
 ---
 
@@ -60,9 +66,9 @@ The sensor is mechanically aligned along the upper thoracic spine (vertebrae T1�
 
 Under quasi-static conditions, the normalized gravity vector $\mathbf{g} = [a_x, a_y, a_z]^T$ yields inclination angles:
 
-$$\theta_{\text{pitch, acc}} = \text{atan2}\left(a_y, \sqrt{a_x^2 + a_z^2}\right) \times \frac{180^\circ}{\pi}$$
+$$\theta_{\text{roll, acc}} = \text{atan2}\left(a_y, \sqrt{a_x^2 + a_z^2}\right) \times \frac{180^\circ}{\pi} \quad \text{(Slouch / Flexion)}$$
 
-$$\theta_{\text{roll, acc}} = \text{atan2}\left(-a_x, a_z\right) \times \frac{180^\circ}{\pi}$$
+$$\theta_{\text{pitch, acc}} = \text{atan2}\left(-a_x, a_z\right) \times \frac{180^\circ}{\pi} \quad \text{(Lateral Tilt)}$$
 
 ### 2.2 Vibration-Aware Complementary Fusion Filter
 
@@ -106,7 +112,7 @@ An abnormal posture condition is triggered if and only if $e_k > \theta_{\text{t
 +----v-----+                       +----v-----+                       +----v-----+
 | MPU6050  |                       | ESP32-C3 |                       | Switch   |
 | 6-DOF    |    I2C Bus (400kHz)   | RISC-V   |                       | Button   |
-| 0x68     |<=====================>| GPIO 4/5 |<----------------------| GPIO 9   |
+| 0x68     |<=====================>| GPIO 8/9 |<----------------------| GPIO 0   |
 +----------+                       +----+-----+                       +----------+
                                         |
                    +--------------------+--------------------+
@@ -123,18 +129,21 @@ An abnormal posture condition is triggered if and only if $e_k > \theta_{\text{t
 ### 3.2 Electrical Interfacing Guidelines
 
 - **Actuator Inductive Protection**: The ERM mini vibration motor must **never** be driven directly from ESP32-C3 GPIOs. An N-channel logic-level MOSFET (AO3400 or 2N7002) is mandatory, along with a 1N5819 Schottky flyback diode across motor terminals and a $10\,\mu\text{F} \parallel 0.1\,\mu\text{F}$ decoupling capacitor array to prevent inductive kickback transients from resetting the SoC.
-- **I2C Signal Line Termination**: External $4.7\,\text{k}\Omega$ pull-up resistors are recommended on SDA (GPIO 4) and SCL (GPIO 5) lines to sustain $400\,\text{kHz}$ Fast Mode operation.
-- **Pushbutton**: GPIO 9 features an internal pull-up and hardware debouncing through the Espressif IoT Button driver.
+- **I2C Signal Line Termination**: External $4.7\,\text{k}\Omega$ pull-up resistors are recommended on SDA (GPIO 8) and SCL (GPIO 9) lines to sustain $400\,\text{kHz}$ Fast Mode operation.
+- **Status LED (GPIO 5)**: Wire LED Anode (+) to GPIO 5 via a $220\Omega - 1\text{k}\Omega$ resistor and Cathode (-) to GND (Active HIGH). If using Active LOW, configure `POSTURE_STATUS_LED_ACTIVE_LEVEL=0`.
+- **Pushbutton**: GPIO 0 (BOOT button) features an internal pull-up and hardware debouncing through the Espressif IoT Button driver.
 
 ### 3.3 Pin Allocation Table
 
 | Signal Name | ESP32-C3 Pin | Peripheral Mode | Target Device | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `I2C_SDA` | GPIO 4 | I2C0 Master SDA | MPU6050 | External $4.7\,\text{k}\Omega$ pull-up |
-| `I2C_SCL` | GPIO 5 | I2C0 Master SCL | MPU6050 | Supports clock recovery |
+| `BATTERY_ADC` | GPIO 1 | ADC1 Channel 1 | Resistor Divider (100k-100k) | Measures $V_{\text{bat}}/2$ ($1.5\text{V} - 2.1\text{V}$) |
+| `STATUS_LED` | GPIO 5 | General Output | Status LED (Active HIGH) | Heartbeat, Calib, Slouch, Low Bat |
 | `HAPTIC_DRV` | GPIO 6 | General Output / PWM | AO3400 MOSFET | Drives ERM Vibration Motor |
 | `BUZZER_DRV` | GPIO 7 | General Output / LEDC | S8050 Transistor | Audible buzzer driver |
-| `USER_BTN` | GPIO 9 | Input (Active LOW) | Pushbutton | Tare calibration & Snooze |
+| `I2C_SDA` | GPIO 8 | I2C0 Master SDA | MPU6050 | External $4.7\,\text{k}\Omega$ pull-up |
+| `I2C_SCL` | GPIO 9 | I2C0 Master SCL | MPU6050 | Supports clock recovery |
+| `USER_BTN` | GPIO 0 | Input (Active LOW) | Pushbutton (BOOT) | Tare calibration & Snooze |
 
 ---
 

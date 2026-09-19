@@ -14,6 +14,11 @@ idf_component_register(
         posture_core
         storage_manager
         actuator_manager
+        battery_monitor
+        status_led
+        mpu6050_sensor
+        app_update
+        esp_app_format
         json
         lwip
     EMBED_FILES
@@ -21,4 +26,5 @@ idf_component_register(
         "../../web/style.css"
         "../../web/app.js"
         "../../web/chart.js"
+        "../../web/skeleton3d.js"
 )

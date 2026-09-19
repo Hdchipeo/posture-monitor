@@ -115,6 +115,7 @@ size_t telemetry_get_snapshot_json(char *buf, size_t max_len) {
         "\"state\":\"%s\","
         "\"pitch\":%.2f,"
         "\"roll\":%.2f,"
+        "\"yaw\":%.2f,"
         "\"pitch_error\":%.2f,"
         "\"roll_error\":%.2f,"
         "\"deviation\":%.2f,"
@@ -131,6 +132,7 @@ size_t telemetry_get_snapshot_json(char *buf, size_t max_len) {
         state_to_str(snap.state),
         snap.pitch,
         snap.roll,
+        snap.yaw,
         snap.pitch_error,
         snap.roll_error,
         snap.deviation,

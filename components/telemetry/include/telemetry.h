@@ -25,6 +25,7 @@ typedef struct {
     posture_fsm_state_t state;          /*!< Current FSM evaluation state */
     float              pitch;           /*!< Filtered pitch angle in degrees */
     float              roll;            /*!< Filtered roll angle in degrees */
+    float              yaw;             /*!< Relative heading / axial twist angle in degrees */
     float              pitch_error;     /*!< Absolute delta from pitch baseline */
     float              roll_error;      /*!< Absolute delta from roll baseline */
     float              deviation;       /*!< Combined angular deviation */

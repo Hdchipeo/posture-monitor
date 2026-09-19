@@ -134,6 +134,9 @@ esp_err_t actuator_manager_init(void) {
         return err;
     }
 
+    gpio_sleep_sel_dis((gpio_num_t)CONFIG_POSTURE_VIBRATION_GPIO);
+    gpio_sleep_sel_dis((gpio_num_t)CONFIG_POSTURE_BUZZER_GPIO);
+
     set_motor(false);
     set_buzzer(false);
 

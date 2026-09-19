@@ -23,6 +23,10 @@
 #include "telemetry.h"
 #include "web_server.h"
 #include "wifi_manager.h"
+#include "status_led.h"
+#include "battery_monitor.h"
+#include "esp_ota_ops.h"
+#include "esp_app_desc.h"
 
 static const char *TAG = "POSTURE_MAIN";
 
@@ -79,6 +83,7 @@ static void posture_monitor_task(void *pvParameters) {
                 case APP_EVENT_BUTTON_TARE:
                     ESP_LOGI(TAG, "Initiating Tare Calibration requested by button");
                     actuator_manager_set_pattern(ALERT_PATTERN_CALIB_START);
+                    mpu6050_sensor_reset_yaw();
                     posture_core_start_calibration();
                     break;
                 case APP_EVENT_BUTTON_SNOOZE:
@@ -109,6 +114,7 @@ static void posture_monitor_task(void *pvParameters) {
 
         // 2. Handle calibration state if active (only if sensor healthy)
         if (sensor_ok && posture_core_is_calibrating()) {
+            status_led_set_mode(STATUS_LED_MODE_CALIBRATING);
             posture_calib_data_t completed_calib;
             esp_err_t calib_status = posture_core_add_calibration_sample(&angles, &completed_calib);
             if (calib_status == ESP_OK) {
@@ -155,9 +161,46 @@ static void posture_monitor_task(void *pvParameters) {
                 default:
                     break;
             }
+
+            // Update Status LED mode independently
+            if (battery_monitor_is_low()) {
+                status_led_set_mode(STATUS_LED_MODE_LOW_BATTERY);
+            } else {
+                switch (fsm_state) {
+                    case POSTURE_STATE_GOOD:
+                        status_led_set_mode(STATUS_LED_MODE_HEARTBEAT);
+                        break;
+
+                    case POSTURE_STATE_SUSPECTED_SLOUCH:
+                    case POSTURE_STATE_ALERT_L1:
+                        status_led_set_mode(STATUS_LED_MODE_SLOUCH_WARN);
+                        break;
+
+                    case POSTURE_STATE_ALERT_L2:
+                        status_led_set_mode(STATUS_LED_MODE_ALARM);
+                        break;
+
+                    case POSTURE_STATE_SNOOZED:
+                        status_led_set_mode(STATUS_LED_MODE_SNOOZED);
+                        break;
+
+                    default:
+                        status_led_set_mode(STATUS_LED_MODE_HEARTBEAT);
+                        break;
+                }
+            }
         } else {
-            // Sensor offline: silence vibration/buzzer for safety
+            // Sensor offline: silence vibration/buzzer and show alarm on LED
             actuator_manager_set_pattern(ALERT_PATTERN_IDLE);
+            status_led_set_mode(STATUS_LED_MODE_ALARM);
+        }
+
+        // Periodic battery voltage sampling (every 1 second = 50 samples @ 50Hz)
+        static uint32_t s_battery_sample_counter = 0;
+        s_battery_sample_counter++;
+        if (s_battery_sample_counter >= CONFIG_POSTURE_SAMPLING_RATE_HZ) {
+            s_battery_sample_counter = 0;
+            battery_monitor_sample();
         }
 
         // 5. Broadcast real-time telemetry snapshot to WebSocket clients at 10 Hz (every 5 sensor samples)
@@ -176,6 +219,7 @@ static void posture_monitor_task(void *pvParameters) {
                 .state = fsm_state,
                 .pitch = angles.pitch,
                 .roll = angles.roll,
+                .yaw = angles.yaw,
                 .pitch_error = d_pitch,
                 .roll_error = d_roll,
                 .deviation = dev,
@@ -184,7 +228,7 @@ static void posture_monitor_task(void *pvParameters) {
                 .is_calibrating = posture_core_is_calibrating(),
                 .is_snoozed = (fsm_state == POSTURE_STATE_SNOOZED),
                 .sensor_ok = sensor_ok,
-                .battery_pct = 92,
+                .battery_pct = battery_monitor_get_percentage(),
                 .wifi_rssi = wifi_manager_get_rssi(),
                 .free_heap = (uint32_t)esp_get_free_heap_size(),
                 .uptime_s = (uint32_t)(esp_timer_get_time() / 1000000ULL)
@@ -200,18 +244,35 @@ static void posture_monitor_task(void *pvParameters) {
             report_counter = 0;
             posture_calib_data_t active_calib;
             posture_core_get_calib(&active_calib);
-            ESP_LOGI(TAG, "STATUS | Pitch: %6.1f deg (Delta: %5.1f) | Roll: %6.1f deg (Delta: %5.1f) | State: %d | FreeHeap: %lu bytes",
-                     angles.pitch, angles.pitch - active_calib.pitch_offset,
-                     angles.roll, angles.roll - active_calib.roll_offset,
-                     fsm_state, (unsigned long)esp_get_free_heap_size());
+            ESP_LOGI(TAG, "STATUS | Roll (Cui/Ngua): %5.1f | Pitch (Nghieng): %5.1f | Yaw (Xoay): %5.1f | State: %d | Bat: %u%% | Heap: %lu B",
+                     angles.roll, angles.pitch, angles.yaw,
+                     fsm_state, (unsigned int)battery_monitor_get_percentage(),
+                     (unsigned long)esp_get_free_heap_size());
         }
     }
 }
 
 void app_main(void) {
+    const esp_app_desc_t *app_desc = esp_app_get_description();
     ESP_LOGI(TAG, "============================================================");
-    ESP_LOGI(TAG, "       ESP32-C3 Posture Monitor & Alert System v1.0         ");
+    ESP_LOGI(TAG, "   ESP32-C3 Posture Monitor & Alert System v%s", app_desc->version);
+    ESP_LOGI(TAG, "   Built: %s %s | IDF: %s", app_desc->date, app_desc->time, app_desc->idf_ver);
     ESP_LOGI(TAG, "============================================================");
+
+    // Validate current OTA running partition and cancel rollback
+    const esp_partition_t *running = esp_ota_get_running_partition();
+    esp_ota_img_states_t ota_state;
+    if (esp_ota_get_state_partition(running, &ota_state) == ESP_OK) {
+        if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
+            ESP_LOGI(TAG, "First boot of newly flashed OTA partition [%s]. Validating...", running->label);
+            esp_ota_mark_app_valid_cancel_rollback();
+            ESP_LOGI(TAG, "OTA partition [%s] marked VALID. Rollback cancelled.", running->label);
+        } else {
+            ESP_LOGI(TAG, "Running on active OTA partition [%s] (state: 0x%02x)", running->label, ota_state);
+        }
+    } else {
+        ESP_LOGI(TAG, "Running on partition [%s]", running ? running->label : "unknown");
+    }
 
     // 1. Create inter-task event queue
     s_event_queue = xQueueCreate(8, sizeof(app_event_type_t));
@@ -222,10 +283,14 @@ void app_main(void) {
     posture_calib_data_t calib_cfg;
     storage_manager_load_calibration(&calib_cfg);
 
-    // 3. Initialize Actuator Manager
+    // 3. Initialize Actuators and Status LED
     ESP_ERROR_CHECK(actuator_manager_init());
+    ESP_ERROR_CHECK(status_led_init());
 
-    // 4. Initialize MPU6050 Sensor Driver
+    // 4. Initialize Battery Monitor (ADC1 GPIO 1 with 100k-100k divider)
+    ESP_ERROR_CHECK(battery_monitor_init());
+
+    // 5. Initialize MPU6050 Sensor Driver
     esp_err_t sensor_err = mpu6050_sensor_init();
     if (sensor_err != ESP_OK) {
         ESP_LOGE(TAG, "CRITICAL: MPU6050 initialization failed! Halting startup.");
@@ -234,20 +299,21 @@ void app_main(void) {
         }
     }
 
-    // 5. Initialize Posture Core FSM
+    // 6. Initialize Posture Core FSM
     ESP_ERROR_CHECK(posture_core_init(&calib_cfg));
 
-    // 6. Initialize Button Controller
+    // 7. Initialize Button Controller
     ESP_ERROR_CHECK(button_ctrl_init(on_button_action, NULL));
 
-    // 7. Initialize Telemetry, Wi-Fi SoftAP and Web Server
+    // 8. Initialize Telemetry Engine
     ESP_ERROR_CHECK(telemetry_init());
+
+    // 9. Launch main posture monitoring task immediately (Sensing, LED & Haptics run first)
+    xTaskCreatePinnedToCore(posture_monitor_task, "posture_task", 4096, NULL, 5, NULL, 0);
+
+    // 10. Start Wi-Fi SoftAP and Web Server
     ESP_ERROR_CHECK(wifi_manager_init_softap());
     ESP_ERROR_CHECK(web_server_start());
-
-    // 8. Launch main posture monitoring task
-    // Stack: 4096 bytes, Priority: 5
-    xTaskCreatePinnedToCore(posture_monitor_task, "posture_task", 4096, NULL, 5, NULL, 0);
 
     ESP_LOGI(TAG, "System operational. Connect phone to 'Posture-Monitor-AP' and visit http://192.168.4.1");
 }

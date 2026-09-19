@@ -134,36 +134,36 @@
         </div>
 
         <div class="vector-content-grid">
-          <!-- 2D Silhouette / Posture Mannequin -->
-          <div class="silhouette-container">
-            <svg id="postureSilhouette" viewBox="0 0 160 200" class="mannequin-svg" aria-label="Spine posture orientation visualizer">
-              <!-- Baseline Reference (Faint Gray) -->
-              <path d="M 80 160 C 80 120, 80 90, 80 50" stroke="#E5E5E7" stroke-width="6" stroke-linecap="round" fill="none" stroke-dasharray="4 4" />
-              <circle cx="80" cy="30" r="16" fill="#E5E5E7" />
-
-              <!-- Live Spine (Animated by Pitch & Roll tilt) -->
-              <g id="liveBodyGroup">
-                <path id="spineCurve" d="M 80 160 C 80 120, 80 90, 80 50" stroke="#1D1D1F" stroke-width="7" stroke-linecap="round" fill="none" />
-                <circle id="headCircle" cx="80" cy="30" r="16" fill="#1D1D1F" />
-                <!-- Sensor Tag Marker on Upper Back -->
-                <rect id="sensorTag" x="73" y="65" width="14" height="10" rx="3" fill="#34C759" />
-              </g>
-
-              <!-- Base Pedestal -->
-              <ellipse cx="80" cy="175" rx="35" ry="6" fill="#E5E5E7" />
-            </svg>
+          <!-- 3D Isometric Mini Skeleton (Three.js Lite) -->
+          <div class="silhouette-container model-3d-container">
+            <div class="canvas-3d-wrapper">
+              <canvas id="postureCanvas3D" class="mannequin-3d-canvas" aria-label="3D Spine posture orientation visualizer"></canvas>
+              <div class="canvas-3d-controls">
+                <button type="button" class="btn-canvas-3d" id="btnReset3D" title="Reset Camera" aria-label="Reset 3D camera view">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                  </svg>
+                  <span>3D</span>
+                </button>
+              </div>
+            </div>
             <div class="vector-caption" id="vectorCaption">Spine angle aligned</div>
           </div>
 
           <!-- Angle Readouts -->
           <div class="angles-table">
             <div class="angle-row">
-              <span class="angle-name" data-i18n="pitch_label">Pitch (Lean)</span>
+              <span class="angle-name" data-i18n="roll_label">Roll (Slouch)</span>
+              <span class="angle-number" id="liveRoll">-0.8°</span>
+            </div>
+            <div class="angle-row">
+              <span class="angle-name" data-i18n="pitch_label">Pitch (Tilt)</span>
               <span class="angle-number" id="livePitch">+2.1°</span>
             </div>
             <div class="angle-row">
-              <span class="angle-name" data-i18n="roll_label">Roll (Tilt)</span>
-              <span class="angle-number" id="liveRoll">-0.8°</span>
+              <span class="angle-name" data-i18n="yaw_label">Yaw (Twist)</span>
+              <span class="angle-number" id="liveYaw">+0.0°</span>
             </div>
             <div class="angle-row highlight">
               <span class="angle-name" data-i18n="total_deviation">Total Deviation</span>
@@ -288,7 +288,7 @@
               <span class="device-subtitle" id="deviceSubStatus" data-i18n="connected_wifi">Connected via Wi-Fi</span>
             </div>
           </div>
-          <span class="badge" id="firmwareVerBadge">v1.0</span>
+          <span class="badge" id="firmwareVerBadge">v1.1.0</span>
         </div>
 
         <div class="device-specs-grid">
@@ -395,6 +395,44 @@
         <button class="btn btn-primary" id="saveConfigBtn" type="button" data-i18n="btn_save">Save to Device</button>
         <button class="btn btn-secondary" id="resetConfigBtn" type="button" data-i18n="btn_reset">Reset Factory Defaults</button>
       </div>
+
+      <!-- iOS Grouped Settings: Firmware OTA Update -->
+      <div class="settings-group-header" data-i18n="group_ota">FIRMWARE UPDATE (OTA)</div>
+      <div class="card settings-card">
+        <div class="ota-container">
+          <div class="ota-header">
+            <div>
+              <div class="setting-title" data-i18n="ota_title">Wireless Firmware Update</div>
+              <div class="setting-desc" id="otaCurrentVerDesc" data-i18n="ota_desc">Flash new posture-monitor.bin directly via Wi-Fi</div>
+            </div>
+            <span class="badge badge-subtle" id="otaCurrentSlot">v1.1.0 • OTA Ready</span>
+          </div>
+
+          <!-- Drag and Drop / File Input Zone -->
+          <div class="ota-dropzone" id="otaDropZone">
+            <input type="file" id="otaFileInput" accept=".bin" class="ota-file-input">
+            <div class="ota-dropzone-content">
+              <svg class="ota-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <div class="ota-prompt-text">
+                <span class="ota-browse-link" data-i18n="ota_select_file">Choose .bin file</span> <span data-i18n="ota_or_drag">or drag & drop here</span>
+              </div>
+              <div class="ota-file-details" id="otaFileDetails" style="display: none;">
+                <span class="ota-filename" id="otaFileName">posture-monitor.bin</span>
+                <span class="ota-filesize" id="otaFileSize">(0 KB)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- OTA Action Button & Status -->
+          <div class="ota-actions-row">
+            <button class="btn btn-primary btn-block" id="startOtaBtn" type="button" disabled data-i18n="btn_start_ota">Upload & Flash Firmware</button>
+          </div>
+        </div>
+      </div>
     </section>
 
   </main>
@@ -440,8 +478,8 @@
           <div class="calib-progress-bar" id="calibProgressBar" style="width: 0%;"></div>
         </div>
         <div class="calib-current-angles">
-          <span>Pitch: <strong id="calibLivePitch">0.0°</strong></span>
           <span>Roll: <strong id="calibLiveRoll">0.0°</strong></span>
+          <span>Pitch: <strong id="calibLivePitch">0.0°</strong></span>
         </div>
         <button class="btn btn-secondary btn-block" id="cancelCalibBtn" type="button" data-i18n="btn_cancel">Cancel</button>
       </div>
@@ -457,12 +495,12 @@
         <p class="modal-desc" data-i18n="calib_complete_desc">Your neutral zero reference has been persisted to NVS flash memory.</p>
         <div class="calib-result-box">
           <div class="result-row">
-            <span data-i18n="calib_pitch_base">Pitch Baseline</span>
-            <strong id="calibResultPitch">+1.82°</strong>
-          </div>
-          <div class="result-row">
             <span data-i18n="calib_roll_base">Roll Baseline</span>
             <strong id="calibResultRoll">-0.43°</strong>
+          </div>
+          <div class="result-row">
+            <span data-i18n="calib_pitch_base">Pitch Baseline</span>
+            <strong id="calibResultPitch">+1.82°</strong>
           </div>
           <div class="result-row">
             <span data-i18n="calib_samples_avg">Samples Averaged</span>
@@ -470,6 +508,36 @@
           </div>
         </div>
         <button class="btn btn-primary btn-block" id="finishCalibBtn" type="button" data-i18n="btn_done">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- OTA PROGRESS & REBOOT MODAL                                       -->
+  <!-- ================================================================= -->
+  <div class="modal-backdrop" id="otaModal" role="dialog" aria-modal="true" aria-labelledby="otaModalTitle" style="display: none;">
+    <div class="modal-card">
+      <div class="ota-modal-icon-wrap" id="otaModalIcon">
+        <svg class="ota-spinner" viewBox="0 0 50 50">
+          <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="4"></circle>
+        </svg>
+      </div>
+      <h3 class="modal-title" id="otaModalTitle" data-i18n="ota_flashing_title">Flashing Firmware...</h3>
+      <p class="modal-desc" id="otaModalDesc" data-i18n="ota_flashing_desc">Writing new binary to passive flash partition. Do not power off or disconnect Wi-Fi.</p>
+      
+      <div class="ota-progress-wrap">
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill ota-fill" id="otaProgressBar" style="width: 0%;"></div>
+        </div>
+        <div class="ota-progress-meta">
+          <span id="otaProgressPct">0%</span>
+          <span id="otaBytesSent">0 KB / 0 KB</span>
+        </div>
+      </div>
+
+      <div class="ota-reboot-countdown" id="otaCountdownWrap" style="display: none;">
+        <span class="ota-countdown-num" id="otaCountdownSec">10</span>
+        <span class="ota-countdown-label" data-i18n="ota_rebooting_label">Seconds until device reconnect...</span>
       </div>
     </div>
   </div>
@@ -506,6 +574,7 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <script src="chart.js"></script>
+  <script src="skeleton3d.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

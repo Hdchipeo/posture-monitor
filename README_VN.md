@@ -21,17 +21,23 @@
   |
   <a href="#4-kiến-trúc-phần-mềm--thành-phần">Kiến Trúc Phần Mềm</a>
   |
-  <a href="#5-máy-trạng-thái--cảnh-báo-lũy-tiến">Máy Trạng Thái</a>
-  |
-  <a href="#6-cấu-hình-menuconfig">Cấu Hình</a>
-  |
-  <a href="#7-hướng-dẫn-cài-đặt--nạp-firmware">Cài Đặt & Nạp</a>
-  |
   <a href="arduino/posture_monitor/README_VN.md">Phiên Bản Arduino</a>
   |
   <a href="./README.md">English Documentation</a>
 
 </div>
+
+---
+
+> ### 📚 TÀI LIỆU KỸ THUẬT CHUYÊN SÂU (TECHNICAL DOCUMENTATION)
+> 1. **Kiến Trúc Phần Mềm & Luồng Chương Trình**: [`docs/software_architecture.md`](docs/software_architecture.md)  
+>    *Phân tầng module, FSM 6 trạng thái, Sequence Diagram, Dual-OTA Anti-Bricking, Web Monitor Engine.*
+> 2. **Sơ Đồ Phần Cứng & Kết Nối Mạch**: [`docs/hardware_schematic.md`](docs/hardware_schematic.md)  
+>    *Sơ đồ khối, sơ đồ nguyên lý mạch, bảng phân bổ chân ESP32-C3 / Classic, linh kiện MOSFET/BJT/Diode.*
+> 3. **Cơ Sở Lý Thuyết & Phương Pháp Tính Toán**: [`docs/theoretical_basis.md`](docs/theoretical_basis.md)  
+>    *Cơ sinh học cột sống, chứng minh đồng pha vi phân bộ lọc bù $\frac{d\theta}{dt} = +g_y$, tích phân Yaw, 3D Kinematics.*
+> 4. **Hướng Dẫn Sử Dụng & Vận Hành**: [`docs/user_manual.md`](docs/user_manual.md)  
+>    *Hướng dẫn đeo máy, mã đèn LED chẩn đoán, thao tác nút bấm Tare/Snooze, kết nối Wi-Fi Web Monitor.*
 
 ---
 
@@ -60,9 +66,9 @@ Cảm biến được gắn dọc theo cột sống ngực trên (đốt sống 
 
 Trong điều kiện tĩnh hoặc chuyển động chậm, vector trọng trường chuẩn hóa $\mathbf{g} = [a_x, a_y, a_z]^T$ xác định các góc nghiêng:
 
-$$\theta_{\text{pitch, acc}} = \text{atan2}\left(a_y, \sqrt{a_x^2 + a_z^2}\right) \times \frac{180^\circ}{\pi}$$
+$$\theta_{\text{roll, acc}} = \text{atan2}\left(a_y, \sqrt{a_x^2 + a_z^2}\right) \times \frac{180^\circ}{\pi} \quad \text{(Cúi / Ngửa)}$$
 
-$$\theta_{\text{roll, acc}} = \text{atan2}\left(-a_x, a_z\right) \times \frac{180^\circ}{\pi}$$
+$$\theta_{\text{pitch, acc}} = \text{atan2}\left(-a_x, a_z\right) \times \frac{180^\circ}{\pi} \quad \text{(Nghiêng)}$$
 
 ### 2.2 Bộ Lọc Bù Khử Nhiễu Rung Cơ Khí
 
@@ -105,8 +111,8 @@ Thiết bị chỉ kết luận tư thế sai khi và chỉ khi $e_k > \theta_{\
      | Đường nguồn 3.3V                 |                                  |
 +----v-----+                       +----v-----+                       +----v-----+
 | MPU6050  |                       | ESP32-C3 |                       | Nút Bấm  |
-| 6-DOF    |    I2C Bus (400kHz)   | RISC-V   |                       | Calib    |
-| 0x68     |<=====================>| GPIO 4/5 |<----------------------| GPIO 9   |
+| 6-DOF    |    I2C Bus (400kHz)   | RISC-V   |                       | BOOT/Cal |
+| 0x68     |<=====================>| GPIO 8/9 |<----------------------| GPIO 0   |
 +----------+                       +----+-----+                       +----------+
                                         |
                    +--------------------+--------------------+
@@ -122,17 +128,20 @@ Thiết bị chỉ kết luận tư thế sai khi và chỉ khi $e_k > \theta_{\
 
 ### 3.2 Hướng Dẫn An Toàn Điện
 - **Bảo Vệ Xung Điện Cảm Từ Motor**: Tuyệt đối **không cấp điện trực tiếp từ chân GPIO ESP32-C3**. Bắt buộc dùng MOSFET kênh N (AO3400 / 2N7002), lắp song song ngược diode Schottky 1N5819 và tổ hợp tụ lọc $10\,\mu\text{F} \parallel 0.1\,\mu\text{F}$ để triệt tiêu sức điện động phản hồi (Back-EMF) làm reset chip.
-- **Điện Trở Kéo Bus I2C**: Đặt điện trở kéo ngoài $4.7\,\text{k}\Omega$ trên SDA (GPIO 4) và SCL (GPIO 5) để vận hành ổn định ở tốc độ Fast Mode 400kHz.
+- **Điện Trở Kéo Bus I2C**: Đặt điện trở kéo ngoài $4.7\,\text{k}\Omega$ trên SDA (GPIO 8) và SCL (GPIO 9) để vận hành ổn định ở tốc độ Fast Mode 400kHz.
+- **LED Trạng Thái (GPIO 5)**: Đấu nối Anode (+) của LED vào GPIO 5 qua điện trở $220\Omega - 1\text{k}\Omega$, Cathode (-) nối vào GND (Active HIGH). Nếu dùng mạch LED Active LOW (nối vào 3.3V), cấu hình `POSTURE_STATUS_LED_ACTIVE_LEVEL=0`.
 
 ### 3.3 Bảng Phân Bổ Chân GPIO
 
 | Tên Tín Hiệu | Chân ESP32-C3 | Chế Độ Ngoại Vi | Thiết Bị Kết Nối | Ghi Chú |
 | :--- | :--- | :--- | :--- | :--- |
-| `I2C_SDA` | GPIO 4 | I2C0 Master SDA | MPU6050 | Điện trở kéo $4.7\,\text{k}\Omega$ |
-| `I2C_SCL` | GPIO 5 | I2C0 Master SCL | MPU6050 | Hỗ trợ phục hồi kẹt bus |
+| `BATTERY_ADC` | GPIO 1 | ADC1 Channel 1 | Mạch chia áp (100k-100k) | Đọc $V_{\text{pin}}/2$ ($1.5\text{V} - 2.1\text{V}$) |
+| `STATUS_LED` | GPIO 5 | Output | LED trạng thái (Active HIGH) | Nhịp tim, Cân chỉnh, Cảnh báo gù |
 | `HAPTIC_DRV` | GPIO 6 | Output / PWM | Cổng G MOSFET AO3400 | Kích motor rung |
 | `BUZZER_DRV` | GPIO 7 | Output / LEDC | Cực B Transistor S8050 | Kích còi chip |
-| `USER_BTN` | GPIO 9 | Input (Active LOW) | Nút bấm | Cân chỉnh Tare & Snooze |
+| `I2C_SDA` | GPIO 8 | I2C0 Master SDA | MPU6050 | Điện trở kéo $4.7\,\text{k}\Omega$ |
+| `I2C_SCL` | GPIO 9 | I2C0 Master SCL | MPU6050 | Hỗ trợ phục hồi kẹt bus |
+| `USER_BTN` | GPIO 0 | Input (Active LOW) | Nút bấm (BOOT) | Cân chỉnh Tare & Snooze |
 
 ---
 

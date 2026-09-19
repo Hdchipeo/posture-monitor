@@ -21,8 +21,9 @@ enum PostureState {
 };
 
 struct Angles {
-    float pitch;
-    float roll;
+    float pitch; /*!< Lateral inclination angle in degrees (Nghiêng) */
+    float roll;  /*!< Forward / Backward inclination angle in degrees (Cúi/Ngửa) */
+    float yaw;   /*!< Relative axial twist angle in degrees (Xoay) */
 };
 
 class PostureCore {
@@ -36,6 +37,7 @@ public:
     void startCalibration(uint16_t sampleCount);
     bool isCalibrating() const;
     bool feedCalibrationSample(CalibrationData &outCalib);
+    void resetYaw();
 
     void snooze(uint32_t seconds);
     PostureState getState() const;

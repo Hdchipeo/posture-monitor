@@ -16,8 +16,9 @@ extern "C" {
 #endif
 
 typedef struct {
-    float pitch;    /*!< Forward / Backward inclination angle in degrees */
-    float roll;     /*!< Lateral (Left / Right) inclination angle in degrees */
+    float pitch;    /*!< Lateral inclination angle in degrees (Nghiêng) */
+    float roll;     /*!< Forward / Backward inclination angle in degrees (Cúi/Ngửa) */
+    float yaw;      /*!< Relative heading / axial twist angle in degrees (Xoay) */
     float yaw_rate; /*!< Z-axis rotational rate in degrees per second */
 } posture_angles_t;
 
@@ -52,6 +53,11 @@ bool mpu6050_sensor_is_healthy(void);
  * @return ESP_OK on success.
  */
 esp_err_t mpu6050_sensor_sleep(void);
+
+/**
+ * @brief Reset integrated yaw reference angle to zero (called during Tare calibration).
+ */
+void mpu6050_sensor_reset_yaw(void);
 
 #ifdef __cplusplus
 }

@@ -65,6 +65,34 @@ menu "Posture Monitor Configuration"
             help
                 GPIO connected to the calibration pushbutton (active LOW with pull-up).
                 On most ESP32 devkits, GPIO 0 is the onboard 'BOOT' button.
+
+        config POSTURE_STATUS_LED_GPIO
+            int "Status LED GPIO"
+            default 2 if IDF_TARGET_ESP32
+            default 5 if IDF_TARGET_ESP32C3
+            default 5
+            range 0 39
+            help
+                GPIO output connected to the status indicator LED.
+                On ESP32-C3: GPIO 5 is assigned.
+
+        config POSTURE_STATUS_LED_ACTIVE_LEVEL
+            int "Status LED Active Level (1=Active HIGH, 0=Active LOW)"
+            default 1
+            range 0 1
+            help
+                Set to 1 if LED connects between GPIO 5 and GND (Active HIGH).
+                Set to 0 if LED connects between 3.3V and GPIO 5 (Active LOW).
+
+        config POSTURE_BATTERY_ADC_GPIO
+            int "Battery Voltage Divider ADC GPIO"
+            default 34 if IDF_TARGET_ESP32
+            default 1 if IDF_TARGET_ESP32C3
+            default 1
+            range 0 39
+            help
+                Analog GPIO connected to the midpoint of the 100k - 100k voltage divider.
+                On ESP32-C3: GPIO 1 corresponds to ADC1_CHANNEL_1.
     endmenu
 
     menu "Algorithm & Signal Processing"

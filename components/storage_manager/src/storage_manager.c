@@ -109,6 +109,14 @@ esp_err_t storage_manager_load_calibration(posture_calib_data_t *out_data) {
         return storage_manager_reset_to_default(out_data);
     }
 
+    // Migration: detect legacy pre-fix horizontal reference (where roll_offset was ~ -90 deg)
+    if (out_data->roll_offset < -45.0f && out_data->roll_offset > -135.0f) {
+        ESP_LOGW(TAG, "Legacy Roll offset (~ -90 deg) detected (%.2f deg). Migrating to vertical reference (+90 deg)...",
+                 out_data->roll_offset);
+        out_data->roll_offset += 90.0f;
+        storage_manager_save_calibration(out_data);
+    }
+
     ESP_LOGI(TAG, "Calibration loaded: Pitch_Offset=%.2f deg, Roll_Offset=%.2f deg, Thresh=%.1f deg",
              out_data->pitch_offset, out_data->roll_offset, out_data->angle_threshold);
     return ESP_OK;

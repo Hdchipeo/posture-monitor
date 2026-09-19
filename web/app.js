@@ -39,8 +39,9 @@
       longest_streak: 'Longest Streak',
       without_slouching: 'Without slouching',
       live_orientation: 'Live Orientation',
-      pitch_label: 'Pitch (Lean)',
-      roll_label: 'Roll (Tilt)',
+      roll_label: 'Roll (Slouch)',
+      pitch_label: 'Pitch (Tilt)',
+      yaw_label: 'Yaw (Twist)',
       total_deviation: 'Total Deviation',
       threshold: 'Threshold',
       chart_title: 'Real-Time Deviation',
@@ -95,8 +96,8 @@
       btn_cancel: 'Cancel',
       calib_complete_title: 'Calibration Complete',
       calib_complete_desc: 'Your neutral zero reference has been persisted to NVS flash memory.',
-      calib_pitch_base: 'Pitch Baseline',
-      calib_roll_base: 'Roll Baseline',
+      calib_roll_base: 'Roll Baseline (Slouch)',
+      calib_pitch_base: 'Pitch Baseline (Tilt)',
       calib_samples_avg: 'Samples Averaged',
       calib_samples_count: '100 samples',
       btn_done: 'Done',
@@ -143,7 +144,22 @@
       evt_slouch_l2: 'Slouch Alert L2',
       evt_slouch_l2_desc: 'Slouch sustained >20s (Pitch: 22.1°)',
       evt_calib: 'Tare Calibrated',
-      evt_calib_desc: 'Zero reference re-centered'
+      evt_calib_desc: 'Zero reference re-centered',
+      // Firmware OTA
+      group_ota: 'FIRMWARE UPDATE (OTA)',
+      ota_title: 'Wireless Firmware Update',
+      ota_desc: 'Flash new posture-monitor.bin directly via Wi-Fi',
+      ota_select_file: 'Choose .bin file',
+      ota_or_drag: 'or drag & drop here',
+      btn_start_ota: 'Upload & Flash Firmware',
+      ota_flashing_title: 'Flashing Firmware...',
+      ota_flashing_desc: 'Writing new binary to passive flash partition. Do not power off or disconnect Wi-Fi.',
+      ota_rebooting_label: 'Seconds until device reconnect...',
+      toast_ota_select_bin: 'Please select a valid .bin firmware file',
+      toast_ota_started: 'OTA firmware upload started...',
+      toast_ota_complete: 'Firmware flashed successfully! Rebooting...',
+      toast_ota_err: 'OTA Flash failed: ',
+      ota_current_ver: 'Active Firmware'
     },
     vi: {
       conn_connecting: 'Đang kết nối...',
@@ -172,8 +188,9 @@
       longest_streak: 'Chuỗi tốt nhất',
       without_slouching: 'Không gù lưng',
       live_orientation: 'Góc nghiêng thời gian thực',
-      pitch_label: 'Cúi/Ngửa (Pitch)',
-      roll_label: 'Nghiêng (Roll)',
+      roll_label: 'Cúi/Ngửa (Roll)',
+      pitch_label: 'Nghiêng (Pitch)',
+      yaw_label: 'Xoay (Yaw)',
       total_deviation: 'Tổng độ lệch',
       threshold: 'Ngưỡng giới hạn',
       chart_title: 'Độ lệch thời gian thực',
@@ -228,8 +245,8 @@
       btn_cancel: 'Hủy',
       calib_complete_title: 'Hiệu chuẩn thành công',
       calib_complete_desc: 'Tư thế chuẩn đã được lưu vào bộ nhớ flash NVS.',
-      calib_pitch_base: 'Pitch chuẩn',
-      calib_roll_base: 'Roll chuẩn',
+      calib_roll_base: 'Roll chuẩn (Cúi/Ngửa)',
+      calib_pitch_base: 'Pitch chuẩn (Nghiêng)',
       calib_samples_avg: 'Số mẫu trung bình',
       calib_samples_count: '100 mẫu',
       btn_done: 'Hoàn tất',
@@ -276,7 +293,22 @@
       evt_slouch_l2: 'Báo động gù lưng Mức 2',
       evt_slouch_l2_desc: 'Gù lưng liên tục >20 giây (Pitch: 22.1°)',
       evt_calib: 'Hiệu chuẩn Tare',
-      evt_calib_desc: 'Đã đặt lại gốc tọa độ mốc 0'
+      evt_calib_desc: 'Đã đặt lại gốc tọa độ mốc 0',
+      // Firmware OTA
+      group_ota: 'CẬP NHẬT FIRMWARE (OTA)',
+      ota_title: 'Cập nhật Firmware không dây',
+      ota_desc: 'Nạp file posture-monitor.bin trực tiếp qua Wi-Fi',
+      ota_select_file: 'Chọn file .bin',
+      ota_or_drag: 'hoặc kéo thả vào đây',
+      btn_start_ota: 'Tải lên & Nạp Firmware',
+      ota_flashing_title: 'Đang nạp Firmware...',
+      ota_flashing_desc: 'Đang ghi firmware mới vào bộ nhớ flash. Tuyệt đối không ngắt nguồn hoặc Wi-Fi.',
+      ota_rebooting_label: 'Giây nữa thiết bị sẽ khởi động lại...',
+      toast_ota_select_bin: 'Vui lòng chọn file firmware .bin hợp lệ',
+      toast_ota_started: 'Bắt đầu nạp firmware OTA...',
+      toast_ota_complete: 'Nạp firmware thành công! Đang khởi động lại...',
+      toast_ota_err: 'Lỗi nạp OTA: ',
+      ota_current_ver: 'Phiên bản đang chạy'
     }
   };
 
@@ -351,11 +383,13 @@
     simMode: false,
     simInterval: null,
     chart: null,
+    skeleton3d: null,
     activeTab: 'tab-today',
     telemetry: {
       state: 'GOOD',
       pitch: 2.1,
       roll: -0.8,
+      yaw: 0.0,
       deviation: 2.2,
       threshold: 15.0,
       battery: 92,
@@ -413,13 +447,16 @@
     l2CountVal: document.getElementById('l2CountVal'),
     longestStreakVal: document.getElementById('longestStreakVal'),
 
-    // Live Orientation & Silhouette
+    // Live Orientation & 3D Mannequin Skeleton
+    postureCanvas3D: document.getElementById('postureCanvas3D'),
+    btnReset3D: document.getElementById('btnReset3D'),
     spineCurve: document.getElementById('spineCurve'),
     headCircle: document.getElementById('headCircle'),
     sensorTag: document.getElementById('sensorTag'),
     vectorCaption: document.getElementById('vectorCaption'),
     livePitch: document.getElementById('livePitch'),
     liveRoll: document.getElementById('liveRoll'),
+    liveYaw: document.getElementById('liveYaw'),
     liveDeviation: document.getElementById('liveDeviation'),
     liveThreshold: document.getElementById('liveThreshold'),
 
@@ -470,7 +507,26 @@
     calibResultRoll: document.getElementById('calibResultRoll'),
 
     // Toast
-    toastContainer: document.getElementById('toastContainer')
+    toastContainer: document.getElementById('toastContainer'),
+
+    // OTA Firmware Update
+    firmwareVerBadge: document.getElementById('firmwareVerBadge'),
+    otaCurrentVerDesc: document.getElementById('otaCurrentVerDesc'),
+    otaFileInput: document.getElementById('otaFileInput'),
+    otaDropZone: document.getElementById('otaDropZone'),
+    otaFileDetails: document.getElementById('otaFileDetails'),
+    otaFileName: document.getElementById('otaFileName'),
+    otaFileSize: document.getElementById('otaFileSize'),
+    startOtaBtn: document.getElementById('startOtaBtn'),
+    otaCurrentSlot: document.getElementById('otaCurrentSlot'),
+    otaModal: document.getElementById('otaModal'),
+    otaModalTitle: document.getElementById('otaModalTitle'),
+    otaModalDesc: document.getElementById('otaModalDesc'),
+    otaProgressBar: document.getElementById('otaProgressBar'),
+    otaProgressPct: document.getElementById('otaProgressPct'),
+    otaBytesSent: document.getElementById('otaBytesSent'),
+    otaCountdownWrap: document.getElementById('otaCountdownWrap'),
+    otaCountdownSec: document.getElementById('otaCountdownSec')
   };
 
   // =========================================================================
@@ -481,6 +537,7 @@
     setupLanguage();
     setupNavigation();
     setupChart();
+    setup3DSkeleton();
     setupEventListeners();
     renderHourlyHeatmap();
     renderTimeline();
@@ -599,9 +656,10 @@
 
         app.activeTab = targetTabId;
 
-        // If switching to Today tab, trigger chart canvas resize
-        if (targetTabId === 'tab-today' && app.chart) {
-          setTimeout(() => app.chart.resize(), 50);
+        // If switching to Today tab, trigger chart and 3D canvas resize
+        if (targetTabId === 'tab-today') {
+          if (app.chart) setTimeout(() => app.chart.resize(), 50);
+          if (app.skeleton3d) setTimeout(() => app.skeleton3d.resize(), 50);
         } else if (targetTabId === 'tab-history') {
           fetchHistory();
         } else if (targetTabId === 'tab-device') {
@@ -624,6 +682,19 @@
       }
     } catch (e) {
       console.warn('Realtime chart initialization bypassed:', e);
+    }
+  }
+
+  // =========================================================================
+  // 3D SKELETON INITIALIZATION (Three.js Lite)
+  // =========================================================================
+  function setup3DSkeleton() {
+    try {
+      if (window.Skeleton3D && dom.postureCanvas3D) {
+        app.skeleton3d = new window.Skeleton3D(dom.postureCanvas3D);
+      }
+    } catch (e) {
+      console.warn('Skeleton3D initialization bypassed:', e);
     }
   }
 
@@ -718,6 +789,7 @@
     telem.state = data.state || telem.state;
     telem.pitch = typeof data.pitch === 'number' ? data.pitch : telem.pitch;
     telem.roll = typeof data.roll === 'number' ? data.roll : telem.roll;
+    telem.yaw = typeof data.yaw === 'number' ? data.yaw : (telem.yaw || 0.0);
     telem.deviation = typeof data.deviation === 'number' ? data.deviation : Math.sqrt(telem.pitch * telem.pitch + telem.roll * telem.roll);
     telem.threshold = typeof data.threshold === 'number' ? data.threshold : telem.threshold;
     telem.battery = typeof data.battery === 'number' ? data.battery : telem.battery;
@@ -789,56 +861,50 @@
     }
   }
 
-  // Update 2D Spine Kinematics & Silhouette Tilt
+  // Update 3D Mannequin Kinematics (Three.js Lite)
   function updateVectorAndSilhouette(telem) {
-    // Pitch leans forward/backward: maps to head forward shift (X offset)
-    // Roll tilts sideways: maps to head and torso lateral offset
-    const pitchOffset = Math.max(-25, Math.min(25, telem.pitch));
-    const rollOffset = Math.max(-20, Math.min(20, telem.roll));
+    const roll = typeof telem.roll === 'number' ? telem.roll : 0.0;
+    const pitch = typeof telem.pitch === 'number' ? telem.pitch : 0.0;
+    const yaw = typeof telem.yaw === 'number' ? telem.yaw : 0.0;
+    const state = telem.state || 'GOOD';
 
-    const baseX = 80;
-    const baseY = 160;
+    // 1. Update 3D Skeleton Engine
+    if (app.skeleton3d) {
+      app.skeleton3d.setAngles(roll, pitch, yaw, state);
+    }
 
-    // Head position: starts at (80, 30)
-    const headX = baseX + rollOffset * 1.5;
-    const headY = 30 + pitchOffset * 0.8;
+    // 2. Fallback SVG support if legacy elements exist
+    if (dom.spineCurve) {
+      const rollOffset = Math.max(-25, Math.min(25, roll));
+      const pitchOffset = Math.max(-20, Math.min(20, pitch));
+      const baseX = 80;
+      const baseY = 160;
+      const headX = baseX + rollOffset * 1.5;
+      const headY = 30 + pitchOffset * 0.8;
+      const ctrlX = baseX + (rollOffset * 0.8) + (pitchOffset * 0.5);
+      const ctrlY = 100 + pitchOffset * 0.3;
+      dom.spineCurve.setAttribute('d', `M ${baseX} ${baseY} Q ${ctrlX} ${ctrlY} ${headX} ${headY}`);
+      if (dom.headCircle) {
+        dom.headCircle.setAttribute('cx', headX);
+        dom.headCircle.setAttribute('cy', headY - 14);
+      }
+      if (dom.sensorTag) {
+        dom.sensorTag.setAttribute('x', baseX + (rollOffset * 0.4) - 7);
+        dom.sensorTag.setAttribute('y', 70 + pitchOffset * 0.4);
+      }
+    }
 
-    // Control point for smooth spine curvature
-    const ctrlX = baseX + (rollOffset * 0.8) + (pitchOffset * 0.5);
-    const ctrlY = 100 + pitchOffset * 0.3;
-
-    // Update SVG Path for spine
-    dom.spineCurve.setAttribute('d', `M ${baseX} ${baseY} Q ${ctrlX} ${ctrlY} ${headX} ${headY}`);
-    dom.headCircle.setAttribute('cx', headX);
-    dom.headCircle.setAttribute('cy', headY - 14);
-
-    // Sensor tag position on thoracic spine
-    const sensorX = baseX + (rollOffset * 0.4) - 7;
-    const sensorY = 70 + pitchOffset * 0.4;
-    dom.sensorTag.setAttribute('x', sensorX);
-    dom.sensorTag.setAttribute('y', sensorY);
-
-    // Color code sensor tag and spine
-    if (telem.state === 'GOOD') {
-      dom.sensorTag.setAttribute('fill', '#34C759');
-      dom.spineCurve.setAttribute('stroke', '#1D1D1F');
-      dom.headCircle.setAttribute('fill', '#1D1D1F');
-      dom.vectorCaption.textContent = i18n('caption_aligned');
-    } else if (telem.state === 'SUSPECTED_SLOUCH') {
-      dom.sensorTag.setAttribute('fill', '#FF9500');
-      dom.spineCurve.setAttribute('stroke', '#FF9500');
-      dom.headCircle.setAttribute('fill', '#FF9500');
-      dom.vectorCaption.textContent = i18n('caption_slouch');
-    } else if (telem.state === 'ALERT_L1' || telem.state === 'ALERT_L2') {
-      dom.sensorTag.setAttribute('fill', '#FF3B30');
-      dom.spineCurve.setAttribute('stroke', '#FF3B30');
-      dom.headCircle.setAttribute('fill', '#FF3B30');
-      dom.vectorCaption.textContent = i18n('caption_alert');
-    } else {
-      dom.sensorTag.setAttribute('fill', '#86868B');
-      dom.spineCurve.setAttribute('stroke', '#1D1D1F');
-      dom.headCircle.setAttribute('fill', '#1D1D1F');
-      dom.vectorCaption.textContent = i18n('caption_paused');
+    // 3. Update Status Caption
+    if (dom.vectorCaption) {
+      if (state === 'GOOD') {
+        dom.vectorCaption.textContent = i18n('caption_aligned');
+      } else if (state === 'SUSPECTED_SLOUCH') {
+        dom.vectorCaption.textContent = i18n('caption_slouch');
+      } else if (state === 'ALERT_L1' || state === 'ALERT_L2') {
+        dom.vectorCaption.textContent = i18n('caption_alert');
+      } else {
+        dom.vectorCaption.textContent = i18n('caption_paused');
+      }
     }
   }
 
@@ -846,10 +912,11 @@
   function updateAngleReadouts(telem) {
     const formatDeg = (val) => `${val >= 0 ? '+' : ''}${val.toFixed(1)}°`;
 
-    dom.livePitch.textContent = formatDeg(telem.pitch);
-    dom.liveRoll.textContent = formatDeg(telem.roll);
-    dom.liveDeviation.textContent = `${telem.deviation.toFixed(1)}°`;
-    dom.liveThreshold.textContent = `${telem.threshold.toFixed(1)}°`;
+    if (dom.liveRoll) dom.liveRoll.textContent = formatDeg(telem.roll);
+    if (dom.livePitch) dom.livePitch.textContent = formatDeg(telem.pitch);
+    if (dom.liveYaw) dom.liveYaw.textContent = formatDeg(typeof telem.yaw === 'number' ? telem.yaw : 0.0);
+    if (dom.liveDeviation) dom.liveDeviation.textContent = `${telem.deviation.toFixed(1)}°`;
+    if (dom.liveThreshold) dom.liveThreshold.textContent = `${telem.threshold.toFixed(1)}°`;
   }
 
   // Update Device Screen Specs
@@ -892,30 +959,35 @@
         simTick++;
         phaseCounter++;
 
+        let r = -0.8;
         let p = 2.0;
-        let r = -0.5;
+        let y = 0.0;
         let state = 'GOOD';
 
         // Periodic scenario cycle: 20s Good -> 6s Slouch Grace -> 10s Alert -> Recover
+        // Roll (Cúi/Ngửa), Pitch (Nghiêng), Yaw (Xoay)
         if (phase === 'good') {
+          r = -0.8 + Math.cos(simTick * 0.06) * 2.0;
           p = 2.0 + Math.sin(simTick * 0.08) * 2.5;
-          r = -0.8 + Math.cos(simTick * 0.06) * 1.5;
+          y = Math.sin(simTick * 0.04) * 8.0;
           state = 'GOOD';
           if (phaseCounter > 180) { // ~18 seconds
             phase = 'slouch_grace';
             phaseCounter = 0;
           }
         } else if (phase === 'slouch_grace') {
-          p = 16.5 + Math.sin(simTick * 0.1) * 2.0; // Exceeds 15 deg threshold
-          r = 4.0;
+          r = 16.5 + Math.sin(simTick * 0.1) * 2.0; // Exceeds 15 deg threshold
+          p = 4.0 + Math.cos(simTick * 0.08) * 1.5;
+          y = 5.0 + Math.sin(simTick * 0.07) * 10.0;
           state = 'SUSPECTED_SLOUCH';
           if (phaseCounter > 50) { // ~5 seconds grace period
             phase = 'slouch_alert';
             phaseCounter = 0;
           }
         } else if (phase === 'slouch_alert') {
-          p = 19.2 + Math.sin(simTick * 0.15) * 2.0;
-          r = 5.2;
+          r = 19.5 + Math.sin(simTick * 0.15) * 2.0;
+          p = 5.2 + Math.cos(simTick * 0.1) * 2.0;
+          y = 12.0 + Math.cos(simTick * 0.08) * 12.0;
           state = phaseCounter > 60 ? 'ALERT_L2' : 'ALERT_L1';
           if (phaseCounter > 100) { // ~10 seconds alert, user corrects
             phase = 'good';
@@ -930,6 +1002,7 @@
           state: state,
           pitch: parseFloat(p.toFixed(2)),
           roll: parseFloat(r.toFixed(2)),
+          yaw: parseFloat(y.toFixed(2)),
           deviation: parseFloat(dev.toFixed(2)),
           threshold: parseFloat(dom.threshSlider.value),
           battery: 92,
@@ -955,6 +1028,15 @@
   // EVENT LISTENERS & USER ACTIONS
   // =========================================================================
   function setupEventListeners() {
+    // 3D Skeleton Camera Reset
+    if (dom.btnReset3D) {
+      dom.btnReset3D.addEventListener('click', () => {
+        if (app.skeleton3d) {
+          app.skeleton3d.resetCamera();
+        }
+      });
+    }
+
     // Language Selector Buttons
     if (dom.btnLangEn) {
       dom.btnLangEn.addEventListener('click', () => setLanguage('en'));
@@ -994,6 +1076,24 @@
 
     // History CSV Export
     dom.exportCsvBtn.addEventListener('click', exportHistoryCsv);
+
+    // OTA Firmware Update
+    if (dom.otaFileInput) {
+      dom.otaFileInput.addEventListener('change', handleOtaFileSelect);
+    }
+    if (dom.otaDropZone) {
+      dom.otaDropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dom.otaDropZone.classList.add('dragover');
+      });
+      dom.otaDropZone.addEventListener('dragleave', () => {
+        dom.otaDropZone.classList.remove('dragover');
+      });
+      dom.otaDropZone.addEventListener('drop', handleOtaFileDrop);
+    }
+    if (dom.startOtaBtn) {
+      dom.startOtaBtn.addEventListener('click', startOtaUpload);
+    }
   }
 
   // =========================================================================
@@ -1107,7 +1207,21 @@
         if (data.escalation_delay_s) dom.escalationDelayInput.value = data.escalation_delay_s;
         if (data.buzzer_enabled !== undefined) dom.buzzerToggle.checked = data.buzzer_enabled;
         if (data.pitch_offset !== undefined && data.roll_offset !== undefined) {
-          dom.currentBaselineDesc.textContent = `Pitch: ${data.pitch_offset.toFixed(1)}° | Roll: ${data.roll_offset.toFixed(1)}°`;
+          dom.currentBaselineDesc.textContent = `Roll (Cúi/Ngửa): ${data.roll_offset.toFixed(1)}° | Pitch (Nghiêng): ${data.pitch_offset.toFixed(1)}°`;
+        }
+        if (data.version) {
+          const verStr = data.version.startsWith('v') ? data.version : `v${data.version}`;
+          if (dom.firmwareVerBadge) {
+            dom.firmwareVerBadge.textContent = verStr;
+          }
+          if (dom.otaCurrentSlot) {
+            dom.otaCurrentSlot.textContent = `${verStr} • ${data.ota_slot || 'ota_0'}`;
+          }
+          if (dom.otaCurrentVerDesc && data.build_date) {
+            dom.otaCurrentVerDesc.textContent = `${i18n('ota_current_ver')}: ${verStr} (${data.build_date}) | Slot: ${data.ota_slot || 'ota_0'}`;
+          }
+        } else if (data.ota_slot && dom.otaCurrentSlot) {
+          dom.otaCurrentSlot.textContent = `Slot: ${data.ota_slot}`;
         }
       })
       .catch(err => console.warn('Could not load config from ESP32:', err));
@@ -1151,6 +1265,118 @@
     dom.buzzerToggle.checked = true;
     saveConfigToDevice();
     showToast(i18n('toast_config_reset'));
+  }
+
+  // =========================================================================
+  // FIRMWARE OTA UPDATE CONTROLLER
+  // =========================================================================
+  let selectedOtaFile = null;
+
+  function setSelectedOtaFile(file) {
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.bin')) {
+      showToast(i18n('toast_ota_select_bin'));
+      return;
+    }
+    selectedOtaFile = file;
+    if (dom.otaFileName) dom.otaFileName.textContent = file.name;
+    if (dom.otaFileSize) {
+      const kb = (file.size / 1024).toFixed(1);
+      const mb = (file.size / (1024 * 1024)).toFixed(2);
+      dom.otaFileSize.textContent = file.size > 1048576 ? `(${mb} MB)` : `(${kb} KB)`;
+    }
+    if (dom.otaFileDetails) dom.otaFileDetails.style.display = 'block';
+    if (dom.startOtaBtn) dom.startOtaBtn.disabled = false;
+  }
+
+  function handleOtaFileSelect(e) {
+    const file = e.target.files && e.target.files[0];
+    if (file) setSelectedOtaFile(file);
+  }
+
+  function handleOtaFileDrop(e) {
+    e.preventDefault();
+    dom.otaDropZone.classList.remove('dragover');
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      setSelectedOtaFile(e.dataTransfer.files[0]);
+    }
+  }
+
+  function startOtaUpload() {
+    if (!selectedOtaFile) {
+      showToast(i18n('toast_ota_select_bin'));
+      return;
+    }
+
+    if (app.simMode) {
+      showToast('Demo Mode: OTA simulation not supported');
+      return;
+    }
+
+    // Open modal
+    dom.otaModal.style.display = 'flex';
+    dom.otaCountdownWrap.style.display = 'none';
+    dom.otaProgressBar.style.width = '0%';
+    dom.otaProgressPct.textContent = '0%';
+    dom.otaBytesSent.textContent = `0 KB / ${(selectedOtaFile.size / 1024).toFixed(0)} KB`;
+    dom.startOtaBtn.disabled = true;
+
+    showToast(i18n('toast_ota_started'));
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/ota', true);
+    xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+
+    xhr.upload.onprogress = function (e) {
+      if (e.lengthComputable) {
+        const pct = Math.round((e.loaded / e.total) * 100);
+        dom.otaProgressBar.style.width = `${pct}%`;
+        dom.otaProgressPct.textContent = `${pct}%`;
+        const loadedKB = (e.loaded / 1024).toFixed(0);
+        const totalKB = (e.total / 1024).toFixed(0);
+        dom.otaBytesSent.textContent = `${loadedKB} KB / ${totalKB} KB`;
+      }
+    };
+
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        dom.otaProgressBar.style.width = '100%';
+        dom.otaProgressPct.textContent = '100%';
+        dom.otaModalTitle.textContent = i18n('toast_ota_complete');
+        dom.otaModalDesc.textContent = i18n('ota_rebooting_label');
+        dom.otaCountdownWrap.style.display = 'flex';
+        showToast(i18n('toast_ota_complete'));
+
+        // 10s countdown to reload
+        let count = 10;
+        dom.otaCountdownSec.textContent = count;
+        const cdInterval = setInterval(() => {
+          count--;
+          if (dom.otaCountdownSec) dom.otaCountdownSec.textContent = count;
+          if (count <= 0) {
+            clearInterval(cdInterval);
+            window.location.reload();
+          }
+        }, 1000);
+      } else {
+        let errMsg = 'HTTP ' + xhr.status;
+        try {
+          const resp = JSON.parse(xhr.responseText);
+          if (resp.message) errMsg = resp.message;
+        } catch (err) {}
+        showToast(i18n('toast_ota_err') + errMsg);
+        dom.otaModal.style.display = 'none';
+        dom.startOtaBtn.disabled = false;
+      }
+    };
+
+    xhr.onerror = function () {
+      showToast(i18n('toast_ota_err') + 'Network connection lost');
+      dom.otaModal.style.display = 'none';
+      dom.startOtaBtn.disabled = false;
+    };
+
+    xhr.send(selectedOtaFile);
   }
 
   // =========================================================================

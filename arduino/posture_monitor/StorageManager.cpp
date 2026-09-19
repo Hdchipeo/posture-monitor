@@ -71,6 +71,14 @@ bool StorageManager::loadCalibration(CalibrationData &data) {
         return false;
     }
 
+    // Migration: detect legacy pre-fix horizontal reference (where rollOffset was ~ -90 deg)
+    if (data.rollOffset < -45.0f && data.rollOffset > -135.0f) {
+        Serial.printf("[Storage] Legacy Roll offset detected (%.2f deg). Migrating to vertical reference (+90 deg)...\n",
+                      data.rollOffset);
+        data.rollOffset += 90.0f;
+        saveCalibration(data);
+    }
+
     Serial.printf("[Storage] Calibration loaded: Pitch_Offset=%.2f, Roll_Offset=%.2f, Thresh=%.1f\n",
                   data.pitchOffset, data.rollOffset, data.angleThreshold);
     return true;

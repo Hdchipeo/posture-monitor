@@ -19,6 +19,8 @@
     #define PIN_I2C_SCL         9   // Alternative: 5
     #define PIN_VIBRATION_MOTOR 6   // Drives N-MOSFET (AO3400)
     #define PIN_BUZZER          7   // Drives Buzzer transistor
+    #define PIN_STATUS_LED      5   // Status diagnostic LED (Active HIGH)
+    #define PIN_BATTERY_ADC     1   // Battery voltage divider (100k-100k, ADC1_CH1)
     #define PIN_BUTTON          0   // Active LOW Boot button (or GPIO 9)
     #define CHIP_MODEL_STR      "ESP32-C3 (RISC-V)"
 #else
@@ -28,6 +30,8 @@
     #define PIN_I2C_SCL         22  // Standard I2C SCL
     #define PIN_VIBRATION_MOTOR 18  // Drives N-MOSFET (AO3400)
     #define PIN_BUZZER          19  // Drives Buzzer transistor
+    #define PIN_STATUS_LED      2   // Diagnostic Status LED
+    #define PIN_BATTERY_ADC     34  // Battery voltage divider (ADC1_CH6)
     #define PIN_BUTTON          0   // On-board BOOT button (Active LOW)
     #define CHIP_MODEL_STR      "ESP32 (Xtensa Dual-Core)"
 #endif

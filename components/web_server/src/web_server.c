@@ -10,6 +10,12 @@
 #include "posture_core.h"
 #include "storage_manager.h"
 #include "actuator_manager.h"
+#include "battery_monitor.h"
+#include "status_led.h"
+#include "mpu6050_sensor.h"
+#include "esp_ota_ops.h"
+#include "esp_partition.h"
+#include "esp_app_desc.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "cJSON.h"
@@ -29,6 +35,9 @@ extern const uint8_t app_js_end[]       asm("_binary_app_js_end");
 
 extern const uint8_t chart_js_start[]   asm("_binary_chart_js_start");
 extern const uint8_t chart_js_end[]     asm("_binary_chart_js_end");
+
+extern const uint8_t skeleton3d_js_start[] asm("_binary_skeleton3d_js_start");
+extern const uint8_t skeleton3d_js_end[]   asm("_binary_skeleton3d_js_end");
 
 static httpd_handle_t s_server = NULL;
 
@@ -79,6 +88,10 @@ static esp_err_t app_js_handler(httpd_req_t *req) {
 
 static esp_err_t chart_js_handler(httpd_req_t *req) {
     return send_embedded_file_chunked(req, chart_js_start, chart_js_end, "application/javascript");
+}
+
+static esp_err_t skeleton3d_js_handler(httpd_req_t *req) {
+    return send_embedded_file_chunked(req, skeleton3d_js_start, skeleton3d_js_end, "application/javascript");
 }
 
 // --------------------------------------------------------------------------
@@ -216,15 +229,25 @@ static esp_err_t api_config_get_handler(httpd_req_t *req) {
     posture_calib_data_t calib;
     posture_core_get_calib(&calib);
 
-    char resp[256];
+    const esp_partition_t *running = esp_ota_get_running_partition();
+    const char *slot_label = (running != NULL) ? running->label : "factory";
+    const esp_app_desc_t *app_desc = esp_app_get_description();
+
+    char resp[384];
     int written = snprintf(resp, sizeof(resp),
         "{\"threshold\":%.1f,\"slouch_delay_s\":%lu,\"escalation_delay_s\":%lu,"
-        "\"pitch_offset\":%.2f,\"roll_offset\":%.2f,\"buzzer_enabled\":true}",
+        "\"pitch_offset\":%.2f,\"roll_offset\":%.2f,\"buzzer_enabled\":true,"
+        "\"ota_slot\":\"%s\",\"version\":\"%s\",\"build_date\":\"%s\",\"build_time\":\"%s\",\"idf_ver\":\"%s\"}",
         calib.angle_threshold,
         (unsigned long)calib.slouch_delay_s,
         (unsigned long)calib.escalation_delay_s,
         calib.pitch_offset,
-        calib.roll_offset);
+        calib.roll_offset,
+        slot_label,
+        app_desc->version,
+        app_desc->date,
+        app_desc->time,
+        app_desc->idf_ver);
 
     httpd_resp_set_type(req, "application/json");
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
@@ -282,6 +305,7 @@ static esp_err_t api_config_post_handler(httpd_req_t *req) {
 static esp_err_t api_calibrate_handler(httpd_req_t *req) {
     ESP_LOGI(TAG, "HTTP POST /api/calibrate from fd=%d", httpd_req_to_sockfd(req));
     actuator_manager_set_pattern(ALERT_PATTERN_CALIB_START);
+    mpu6050_sensor_reset_yaw();
     posture_core_start_calibration();
     telemetry_record_event("calib", "Tare Calibrated", "Zero baseline initialized via Web UI");
 
@@ -327,13 +351,190 @@ static esp_err_t api_history_handler(httpd_req_t *req) {
 }
 
 // --------------------------------------------------------------------------
+// OTA FIRMWARE UPDATE HANDLER (/api/ota)
+// --------------------------------------------------------------------------
+static void ota_restart_timer_callback(void *arg) {
+    ESP_LOGI(TAG, "OTA restart timer expired. Rebooting now...");
+    esp_restart();
+}
+
+static void schedule_delayed_restart(uint32_t delay_ms) {
+    const esp_timer_create_args_t timer_args = {
+        .callback = &ota_restart_timer_callback,
+        .name = "ota_reboot",
+        .dispatch_method = ESP_TIMER_TASK,
+    };
+    esp_timer_handle_t timer;
+    esp_err_t err = esp_timer_create(&timer_args, &timer);
+    if (err == ESP_OK) {
+        esp_timer_start_once(timer, (uint64_t)delay_ms * 1000ULL);
+    } else {
+        vTaskDelay(pdMS_TO_TICKS(delay_ms));
+        esp_restart();
+    }
+}
+
+static esp_err_t api_ota_handler(httpd_req_t *req) {
+    ESP_LOGI(TAG, "OTA upload initiated: total_len=%d bytes from fd=%d", req->content_len, httpd_req_to_sockfd(req));
+
+    // 1. Safety Check: Low Battery Protection
+    if (battery_monitor_is_low() || battery_monitor_get_percentage() < 20) {
+        ESP_LOGE(TAG, "OTA rejected: Battery too low (%u%%)", (unsigned int)battery_monitor_get_percentage());
+        httpd_resp_set_status(req, "403 Forbidden");
+        httpd_resp_set_type(req, "application/json");
+        httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+        return httpd_resp_sendstr(req, "{\"status\":\"error\",\"message\":\"Battery is below 20%. Please connect USB charger before updating.\"}");
+    }
+
+    if (req->content_len <= 0) {
+        ESP_LOGE(TAG, "OTA rejected: Content-Length is empty or zero");
+        httpd_resp_set_status(req, "400 Bad Request");
+        httpd_resp_set_type(req, "application/json");
+        httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+        return httpd_resp_sendstr(req, "{\"status\":\"error\",\"message\":\"No firmware file provided in upload.\"}");
+    }
+
+    // 2. Identify target OTA partition
+    const esp_partition_t *update_partition = esp_ota_get_next_update_partition(NULL);
+    if (!update_partition) {
+        ESP_LOGE(TAG, "Cannot find passive OTA partition! Check partition table.");
+        httpd_resp_set_status(req, "500 Internal Server Error");
+        httpd_resp_set_type(req, "application/json");
+        httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+        return httpd_resp_sendstr(req, "{\"status\":\"error\",\"message\":\"No passive OTA partition found on device.\"}");
+    }
+
+    ESP_LOGI(TAG, "Target OTA partition: '%s' at offset 0x%lx (size: 0x%lx)",
+             update_partition->label, (unsigned long)update_partition->address, (unsigned long)update_partition->size);
+
+    // 3. Pause Actuators and Signal Rapid Blink Status LED
+    actuator_manager_set_pattern(ALERT_PATTERN_IDLE);
+    status_led_set_mode(STATUS_LED_MODE_CALIBRATING); // 5 Hz rapid strobe indicates OTA in-progress
+
+    esp_ota_handle_t ota_handle = 0;
+    esp_err_t err = esp_ota_begin(update_partition, OTA_WITH_SEQUENTIAL_WRITES, &ota_handle);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "esp_ota_begin failed: %s", esp_err_to_name(err));
+        status_led_set_mode(STATUS_LED_MODE_HEARTBEAT);
+        httpd_resp_set_status(req, "500 Internal Server Error");
+        httpd_resp_set_type(req, "application/json");
+        httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+        return httpd_resp_sendstr(req, "{\"status\":\"error\",\"message\":\"Failed to begin OTA flash session.\"}");
+    }
+
+    // 4. Stream and Write Binary Chunks
+    const size_t buf_size = 1024;
+    char *ota_buf = malloc(buf_size);
+    if (!ota_buf) {
+        esp_ota_abort(ota_handle);
+        status_led_set_mode(STATUS_LED_MODE_HEARTBEAT);
+        httpd_resp_set_status(req, "500 Internal Server Error");
+        httpd_resp_set_type(req, "application/json");
+        httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+        return httpd_resp_sendstr(req, "{\"status\":\"error\",\"message\":\"Failed to allocate buffer for OTA.\"}");
+    }
+
+    int remaining = req->content_len;
+    bool is_first_chunk = true;
+
+    while (remaining > 0) {
+        int to_read = (remaining < (int)buf_size) ? remaining : (int)buf_size;
+        int recv_len = httpd_req_recv(req, ota_buf, to_read);
+        if (recv_len <= 0) {
+            if (recv_len == HTTPD_SOCK_ERR_TIMEOUT) {
+                continue; // Retry receive on timeout
+            }
+            ESP_LOGE(TAG, "OTA chunk receive error (recv_len=%d)", recv_len);
+            free(ota_buf);
+            esp_ota_abort(ota_handle);
+            status_led_set_mode(STATUS_LED_MODE_HEARTBEAT);
+            httpd_resp_set_status(req, "500 Internal Server Error");
+            httpd_resp_set_type(req, "application/json");
+            httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+            return httpd_resp_sendstr(req, "{\"status\":\"error\",\"message\":\"Network connection disconnected during OTA.\"}");
+        }
+
+        // Validate Magic Byte 0xE9 on the very first byte of the binary image
+        if (is_first_chunk) {
+            is_first_chunk = false;
+            if ((uint8_t)ota_buf[0] != 0xE9) {
+                ESP_LOGE(TAG, "OTA image validation failed: byte 0 is 0x%02X (expected 0xE9)", (uint8_t)ota_buf[0]);
+                free(ota_buf);
+                esp_ota_abort(ota_handle);
+                status_led_set_mode(STATUS_LED_MODE_HEARTBEAT);
+                httpd_resp_set_status(req, "400 Bad Request");
+                httpd_resp_set_type(req, "application/json");
+                httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+                return httpd_resp_sendstr(req, "{\"status\":\"error\",\"message\":\"Invalid firmware file. File must be a valid ESP32 .bin binary.\"}");
+            }
+        }
+
+        err = esp_ota_write(ota_handle, ota_buf, recv_len);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "esp_ota_write failed at %d bytes remaining: %s", remaining, esp_err_to_name(err));
+            free(ota_buf);
+            esp_ota_abort(ota_handle);
+            status_led_set_mode(STATUS_LED_MODE_HEARTBEAT);
+            httpd_resp_set_status(req, "500 Internal Server Error");
+            httpd_resp_set_type(req, "application/json");
+            httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+            return httpd_resp_sendstr(req, "{\"status\":\"error\",\"message\":\"Flash write error during OTA.\"}");
+        }
+
+        remaining -= recv_len;
+    }
+
+    free(ota_buf);
+
+    // 5. Finalize and validate OTA checksum
+    err = esp_ota_end(ota_handle);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "esp_ota_end validation failed: %s", esp_err_to_name(err));
+        status_led_set_mode(STATUS_LED_MODE_HEARTBEAT);
+        httpd_resp_set_status(req, "500 Internal Server Error");
+        httpd_resp_set_type(req, "application/json");
+        httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+        return httpd_resp_sendstr(req, "{\"status\":\"error\",\"message\":\"Firmware image validation/checksum failed.\"}");
+    }
+
+    // 6. Switch active boot partition to new slot
+    err = esp_ota_set_boot_partition(update_partition);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "esp_ota_set_boot_partition failed: %s", esp_err_to_name(err));
+        status_led_set_mode(STATUS_LED_MODE_HEARTBEAT);
+        httpd_resp_set_status(req, "500 Internal Server Error");
+        httpd_resp_set_type(req, "application/json");
+        httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+        return httpd_resp_sendstr(req, "{\"status\":\"error\",\"message\":\"Failed to set new boot partition.\"}");
+    }
+
+    esp_app_desc_t new_app_desc;
+    if (esp_ota_get_partition_description(update_partition, &new_app_desc) == ESP_OK) {
+        ESP_LOGI(TAG, "OTA upgrade SUCCESSFUL! Target partition '%s' verified with App '%s' v%s (Built: %s %s | IDF %s). Rebooting in 1.5s...",
+                 update_partition->label, new_app_desc.project_name, new_app_desc.version,
+                 new_app_desc.date, new_app_desc.time, new_app_desc.idf_ver);
+    } else {
+        ESP_LOGI(TAG, "OTA upgrade SUCCESSFUL! Next boot will launch from partition '%s'. Rebooting in 1.5s...", update_partition->label);
+    }
+    status_led_set_mode(STATUS_LED_MODE_SOLID);
+
+    httpd_resp_set_status(req, "200 OK");
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    httpd_resp_sendstr(req, "{\"status\":\"ok\",\"message\":\"Firmware update successful! Device restarting...\"}");
+
+    schedule_delayed_restart(1500);
+    return ESP_OK;
+}
+
+// --------------------------------------------------------------------------
 // HTTP SERVER INITIALIZATION
 // --------------------------------------------------------------------------
 esp_err_t web_server_start(void) {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
-    // Critical: Configure max_uri_handlers to 20 (default is 8)
-    config.max_uri_handlers = 20;
+    // Configure max_uri_handlers to 25 to support all endpoints and captive portal
+    config.max_uri_handlers = 25;
 
     // Critical: Configure buffer limits per Knowledge Item to prevent "Header fields are too long"
     config.max_req_hdr_len = 2048;
@@ -367,6 +568,9 @@ esp_err_t web_server_start(void) {
     httpd_uri_t uri_chart = { .uri = "/chart.js", .method = HTTP_GET, .handler = chart_js_handler };
     httpd_register_uri_handler(s_server, &uri_chart);
 
+    httpd_uri_t uri_skeleton3d = { .uri = "/skeleton3d.js", .method = HTTP_GET, .handler = skeleton3d_js_handler };
+    httpd_register_uri_handler(s_server, &uri_skeleton3d);
+
     // Register WebSocket Handler (/ws)
     httpd_uri_t uri_ws = {
         .uri = "/ws",
@@ -394,6 +598,14 @@ esp_err_t web_server_start(void) {
 
     httpd_uri_t uri_api_hist = { .uri = "/api/history", .method = HTTP_GET, .handler = api_history_handler };
     httpd_register_uri_handler(s_server, &uri_api_hist);
+
+    // Register OTA Firmware Update Handler (/api/ota)
+    httpd_uri_t uri_api_ota = {
+        .uri = "/api/ota",
+        .method = HTTP_POST,
+        .handler = api_ota_handler
+    };
+    httpd_register_uri_handler(s_server, &uri_api_ota);
 
     // Register Captive Portal Auto-Detect Handlers (iOS & Android)
     httpd_uri_t uri_apple_detect = { .uri = "/hotspot-detect.html", .method = HTTP_GET, .handler = captive_redirect_handler };

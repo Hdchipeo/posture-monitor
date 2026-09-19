@@ -48,6 +48,7 @@ static const char *TAG = "MPU6050_SENSOR";
 static mpu6050_handle_t s_mpu6050_handle = NULL;
 static float s_pitch = 0.0f;
 static float s_roll = 0.0f;
+static float s_yaw = 0.0f;
 static bool s_filter_initialized = false;
 static bool s_is_healthy = false;
 static uint32_t s_consecutive_failures = 0;
@@ -188,31 +189,53 @@ esp_err_t mpu6050_sensor_update(float dt, bool freeze_accel_bias, posture_angles
     float gy = gyro.gyro_y;
     float gz = gyro.gyro_z;
 
+    // Physical Angle Mapping:
+    // Device is worn vertically on the spine (X-axis along thoracic spine, Y across shoulders, Z normal to back).
+    // - Cúi / Ngửa (Sagittal flexion/extension): Changes az & ax -> Roll = atan2(az, ax) (0 deg upright, + forward)
+    // - Nghiêng (Coronal lateral tilt left/right): Changes ay -> Pitch = atan2(ay, sqrt(ax^2 + az^2))
+    float roll_acc  = atan2f(az, ax) * RAD_TO_DEG;
     float pitch_acc = atan2f(ay, sqrtf(ax * ax + az * az)) * RAD_TO_DEG;
-    float roll_acc  = atan2f(-ax, az) * RAD_TO_DEG;
 
     if (!s_filter_initialized) {
+        s_roll  = roll_acc;
         s_pitch = pitch_acc;
-        s_roll = roll_acc;
         s_filter_initialized = true;
     } else {
         if (freeze_accel_bias) {
-            // While the mini vibration motor is active, freeze the accelerometer gravity reference
-            // to eliminate actuator acoustic vibration noise and integrate gyroscope angular velocity only.
-            s_pitch += gx * dt;
+            // While mini vibration motor is active, freeze accelerometer reference
             s_roll  += gy * dt;
+            s_pitch += gx * dt;
         } else {
             float alpha = (float)CONFIG_POSTURE_FILTER_ALPHA_X100 / 100.0f;
-            s_pitch = alpha * (s_pitch + gx * dt) + (1.0f - alpha) * pitch_acc;
             s_roll  = alpha * (s_roll  + gy * dt) + (1.0f - alpha) * roll_acc;
+            s_pitch = alpha * (s_pitch + gx * dt) + (1.0f - alpha) * pitch_acc;
         }
     }
 
-    out_angles->pitch = s_pitch;
-    out_angles->roll = s_roll;
-    out_angles->yaw_rate = gz;
+    // Compute axial Yaw rate by projecting gyro vector onto gravity vector (orthogonal to Earth)
+    float norm_a = sqrtf(ax * ax + ay * ay + az * az);
+    float yaw_rate = (norm_a > 0.1f) ? ((ax * gx + ay * gy + az * gz) / norm_a) : gx;
+
+    // Deadband threshold to eliminate stationary sensor drift
+    if (fabsf(yaw_rate) > 0.35f) {
+        s_yaw += yaw_rate * dt;
+    }
+
+    // Wrap yaw to [-180, +180] degrees
+    if (s_yaw > 180.0f) s_yaw -= 360.0f;
+    else if (s_yaw < -180.0f) s_yaw += 360.0f;
+
+    out_angles->roll  = s_roll;  // Cúi / Ngửa (Forward / Backward hunch)
+    out_angles->pitch = s_pitch; // Nghiêng (Lateral tilt)
+    out_angles->yaw   = s_yaw;   // Xoay (Axial twist)
+    out_angles->yaw_rate = yaw_rate;
 
     return ESP_OK;
+}
+
+void mpu6050_sensor_reset_yaw(void) {
+    s_yaw = 0.0f;
+    ESP_LOGI(TAG, "Yaw relative heading reset to 0.0 deg (Tare Calibrated)");
 }
 
 bool mpu6050_sensor_is_healthy(void) {
