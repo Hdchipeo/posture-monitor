@@ -1,0 +1,283 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 800" width="100%" height="100%">
+<defs>
+      <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.08"/>
+      </filter>
+      <linearGradient id="boardGrad" x1="0" y1="0" x2="0" y2="1">
+        <feStop offset="0%" stop-color="#1e293b"/>
+        <feStop offset="100%" stop-color="#0f172a"/>
+      </linearGradient>
+      <linearGradient id="usbGrad" x1="0" y1="0" x2="0" y2="1">
+        <feStop offset="0%" stop-color="#cbd5e1"/>
+        <feStop offset="100%" stop-color="#94a3b8"/>
+      </linearGradient>
+      <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+        <feStop offset="0%" stop-color="#fef08a"/>
+        <feStop offset="100%" stop-color="#eab308"/>
+      </linearGradient>
+    </defs>
+<rect width="1100" height="800" fill="#f8fafc" rx="8"/>
+<g id="header">
+      <rect x="30" y="16" width="1040" height="52" rx="6" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" filter="url(#shadow)"/>
+      <text x="50" y="38" font-family="Times New Roman, serif" font-size="17" font-weight="bold" fill="#0f172a">SƠ ĐỒ ĐẤU NỐI DÂY CHI TIẾT - POSTURE MONITOR (ESP32-C3 SUPERMINI)</text>
+      <text x="50" y="56" font-family="Times New Roman, serif" font-size="11.5" fill="#64748b">Thiết bị giám sát tư thế ngồi • Vi điều khiển ESP32-C3 SuperMini • MPU6050 • Module Rung • Còi Buzzer • LED • Pin LiPo 3.7V • Sạc Type-C</text>
+    </g>
+<g id="esp32c3" filter="url(#shadow)">
+      <!-- Board body -->
+      <rect x="460" y="260" width="180" height="280" rx="10" fill="url(#boardGrad)" stroke="#334155" stroke-width="2"/>
+      
+      <!-- USB Type-C on top -->
+      <rect x="525.0" y="244" width="50" height="24" rx="4" fill="url(#usbGrad)" stroke="#64748b" stroke-width="1.5"/>
+      <rect x="534.0" y="248" width="32" height="12" rx="3" fill="#475569"/>
+      <text x="550.0" y="278" font-family="sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle" font-weight="bold">TYPE-C USB</text>
+      
+      <!-- ESP32-C3 SoC Chip in 45-deg diamond or rect -->
+      <rect x="505" y="370" width="90" height="90" rx="4" fill="#1e293b" stroke="#475569" stroke-width="1.5" transform="rotate(45 550 415)"/>
+      <text x="550" y="412" font-family="sans-serif" font-size="9" fill="#f1f5f9" text-anchor="middle" font-weight="bold">ESP32-C3</text>
+      <text x="550" y="424" font-family="sans-serif" font-size="7" fill="#94a3b8" text-anchor="middle">RISC-V 160MHz</text>
+      
+      <!-- Buttons -->
+      <!-- BOOT Button -->
+      <rect x="495" y="298" width="32" height="30" rx="3" fill="#e2e8f0" stroke="#94a3b8"/>
+      <circle cx="511" cy="313" r="8" fill="#334155"/>
+      <text x="511" y="340" font-family="sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">BOOT</text>
+      
+      <!-- RST Button -->
+      <rect x="573" y="298" width="32" height="30" rx="3" fill="#e2e8f0" stroke="#94a3b8"/>
+      <circle cx="589" cy="313" r="8" fill="#334155"/>
+      <text x="589" y="340" font-family="sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">RST</text>
+      
+      <!-- Antenna at bottom -->
+      <rect x="500" y="512" width="100" height="18" rx="2" fill="#b91c1c" stroke="#dc2626"/>
+      <text x="550" y="525" font-family="sans-serif" font-size="10" fill="#ffffff" text-anchor="middle" font-weight="bold">[ C3 ANTENNA ]</text>
+      
+      <!-- Board Name -->
+      <text x="550" y="488" font-family="sans-serif" font-size="11" fill="#38bdf8" text-anchor="middle" font-weight="bold">ESP32-C3 SuperMini</text>
+    </g>
+<circle cx="470" cy="296" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="470" cy="296" r="3.5" fill="#0f172a"/>
+<text x="484" y="300" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold">5</text>
+<circle cx="470" cy="322" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="470" cy="322" r="3.5" fill="#0f172a"/>
+<text x="484" y="326" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold">6</text>
+<circle cx="470" cy="348" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="470" cy="348" r="3.5" fill="#0f172a"/>
+<text x="484" y="352" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold">7</text>
+<circle cx="470" cy="374" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="470" cy="374" r="3.5" fill="#0f172a"/>
+<text x="484" y="378" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold">8</text>
+<circle cx="470" cy="400" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="470" cy="400" r="3.5" fill="#0f172a"/>
+<text x="484" y="404" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold">9</text>
+<circle cx="470" cy="426" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="470" cy="426" r="3.5" fill="#0f172a"/>
+<text x="484" y="430" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold">10</text>
+<circle cx="470" cy="452" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="470" cy="452" r="3.5" fill="#0f172a"/>
+<text x="484" y="456" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold">20</text>
+<circle cx="470" cy="478" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="470" cy="478" r="3.5" fill="#0f172a"/>
+<text x="484" y="482" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold">21</text>
+<circle cx="630" cy="296" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="630" cy="296" r="3.5" fill="#0f172a"/>
+<text x="616" y="300" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold" text-anchor="end">5V</text>
+<circle cx="630" cy="322" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="630" cy="322" r="3.5" fill="#0f172a"/>
+<text x="616" y="326" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold" text-anchor="end">G</text>
+<circle cx="630" cy="348" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="630" cy="348" r="3.5" fill="#0f172a"/>
+<text x="616" y="352" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold" text-anchor="end">3.3</text>
+<circle cx="630" cy="374" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="630" cy="374" r="3.5" fill="#0f172a"/>
+<text x="616" y="378" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold" text-anchor="end">4</text>
+<circle cx="630" cy="400" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="630" cy="400" r="3.5" fill="#0f172a"/>
+<text x="616" y="404" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold" text-anchor="end">3</text>
+<circle cx="630" cy="426" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="630" cy="426" r="3.5" fill="#0f172a"/>
+<text x="616" y="430" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold" text-anchor="end">2</text>
+<circle cx="630" cy="452" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="630" cy="452" r="3.5" fill="#0f172a"/>
+<text x="616" y="456" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold" text-anchor="end">1</text>
+<circle cx="630" cy="478" r="7" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1.5"/>
+<circle cx="630" cy="478" r="3.5" fill="#0f172a"/>
+<text x="616" y="482" font-family="sans-serif" font-size="10" fill="#f8fafc" font-weight="bold" text-anchor="end">0</text>
+<g id="mpu6050" filter="url(#shadow)">
+      <rect x="45" y="90" width="185" height="180" rx="6" fill="#0284c7" stroke="#0369a1" stroke-width="2"/>
+      <!-- Header Title at Top -->
+      <rect x="45" y="90" width="185" height="28" rx="6" fill="#0369a1"/>
+      <text x="137.5" y="109" font-family="Times New Roman, serif" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="bold">CẢM BIẾN MPU6050</text>
+      
+      <!-- Sensor chip -->
+      <rect x="60" y="145" width="70" height="70" rx="3" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+      <text x="95" y="180" font-family="sans-serif" font-size="9.5" fill="#f8fafc" text-anchor="middle" font-weight="bold">MPU-6050</text>
+      <text x="95" y="194" font-family="sans-serif" font-size="7.5" fill="#38bdf8" text-anchor="middle">6-DOF IMU</text>
+      <text x="95" y="238" font-family="sans-serif" font-size="8.5" fill="#e0f2fe" text-anchor="middle">Đo góc cúi / nghiêng</text>
+    </g>
+<circle cx="220" cy="130" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="220" cy="130" r="2.5" fill="#0f172a"/>
+<text x="210" y="133.5" font-family="sans-serif" font-size="8.5" fill="#ffffff" font-weight="bold" text-anchor="end">VCC</text>
+<circle cx="220" cy="147" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="220" cy="147" r="2.5" fill="#0f172a"/>
+<text x="210" y="150.5" font-family="sans-serif" font-size="8.5" fill="#ffffff" font-weight="bold" text-anchor="end">GND</text>
+<circle cx="220" cy="164" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="220" cy="164" r="2.5" fill="#0f172a"/>
+<text x="210" y="167.5" font-family="sans-serif" font-size="8.5" fill="#ffffff" font-weight="bold" text-anchor="end">SCL</text>
+<circle cx="220" cy="181" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="220" cy="181" r="2.5" fill="#0f172a"/>
+<text x="210" y="184.5" font-family="sans-serif" font-size="8.5" fill="#ffffff" font-weight="bold" text-anchor="end">SDA</text>
+<circle cx="220" cy="198" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="220" cy="198" r="2.5" fill="#0f172a"/>
+<text x="210" y="201.5" font-family="sans-serif" font-size="8.5" fill="#ffffff" font-weight="bold" text-anchor="end">XDA</text>
+<circle cx="220" cy="215" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="220" cy="215" r="2.5" fill="#0f172a"/>
+<text x="210" y="218.5" font-family="sans-serif" font-size="8.5" fill="#ffffff" font-weight="bold" text-anchor="end">XCL</text>
+<circle cx="220" cy="232" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="220" cy="232" r="2.5" fill="#0f172a"/>
+<text x="210" y="235.5" font-family="sans-serif" font-size="8.5" fill="#ffffff" font-weight="bold" text-anchor="end">AD0</text>
+<circle cx="220" cy="249" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="220" cy="249" r="2.5" fill="#0f172a"/>
+<text x="210" y="252.5" font-family="sans-serif" font-size="8.5" fill="#ffffff" font-weight="bold" text-anchor="end">INT</text>
+<g id="vib_motor" filter="url(#shadow)">
+      <rect x="45" y="305" width="185" height="155" rx="6" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+      <rect x="45" y="305" width="185" height="28" rx="6" fill="#0f172a"/>
+      <text x="137.5" y="324" font-family="Times New Roman, serif" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="bold">MODULE MOTOR RUNG</text>
+      
+      <!-- Coin motor shape -->
+      <circle cx="100" cy="390" r="32" fill="#64748b" stroke="#475569" stroke-width="2"/>
+      <circle cx="100" cy="390" r="24" fill="#334155"/>
+      <circle cx="100" cy="390" r="9" fill="#94a3b8"/>
+      <!-- SMD Transistor indicator -->
+      <rect x="147" y="370" width="16" height="22" rx="2" fill="#0f172a" stroke="#64748b"/>
+      <text x="155" y="384" font-family="sans-serif" font-size="6" fill="#cbd5e1" text-anchor="middle">MOS</text>
+      <text x="100" y="438" font-family="sans-serif" font-size="8.5" fill="#94a3b8" text-anchor="middle">Động cơ dẹt ERM</text>
+    </g>
+<circle cx="220" cy="373" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="220" cy="373" r="2.5" fill="#0f172a"/>
+<text x="210" y="376.5" font-family="sans-serif" font-size="9" fill="#f8fafc" font-weight="bold" text-anchor="end">IN</text>
+<circle cx="220" cy="399" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="220" cy="399" r="2.5" fill="#0f172a"/>
+<text x="210" y="402.5" font-family="sans-serif" font-size="9" fill="#f8fafc" font-weight="bold" text-anchor="end">VCC</text>
+<circle cx="220" cy="425" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="220" cy="425" r="2.5" fill="#0f172a"/>
+<text x="210" y="428.5" font-family="sans-serif" font-size="9" fill="#f8fafc" font-weight="bold" text-anchor="end">GND</text>
+<g id="buzzer" filter="url(#shadow)">
+      <rect x="45" y="495" width="185" height="135" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+      <rect x="45" y="495" width="185" height="28" rx="6" fill="#f1f5f9"/>
+      <text x="137.5" y="514" font-family="Times New Roman, serif" font-size="13" fill="#0f172a" text-anchor="middle" font-weight="bold">CÒI BÁO ĐỘNG (BUZZER)</text>
+      <circle cx="95" cy="573" r="30" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+      <circle cx="95" cy="573" r="18" fill="#1e293b"/>
+      <circle cx="95" cy="573" r="6" fill="#e2e8f0"/>
+      <text x="95" y="617" font-family="sans-serif" font-size="8" fill="#64748b" text-anchor="middle">Active Buzzer 3.3V-5V</text>
+    </g>
+<circle cx="220" cy="553" r="5" fill="#dc2626" stroke="#991b1b" stroke-width="1"/>
+<text x="212" y="557" font-family="sans-serif" font-size="8.5" fill="#dc2626" font-weight="bold" text-anchor="end">Dây Đỏ (+)</text>
+<circle cx="220" cy="589" r="5" fill="#1e293b" stroke="#0f172a" stroke-width="1"/>
+<text x="212" y="593" font-family="sans-serif" font-size="8.5" fill="#1e293b" font-weight="bold" text-anchor="end">Dây Đen (-)</text>
+<g id="led_box" filter="url(#shadow)">
+      <rect x="860" y="90" width="195" height="145" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+      <rect x="860" y="90" width="195" height="28" rx="6" fill="#f1f5f9"/>
+      <text x="957.5" y="109" font-family="Times New Roman, serif" font-size="13" fill="#0f172a" text-anchor="middle" font-weight="bold">ĐÈN LED BÁO TRẠNG THÁI</text>
+      
+      <!-- LED shape -->
+      <path d="M 990 132 A 13 13 0 0 1 1016 132 L 1016 144 L 990 144 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="1.5"/>
+      <rect x="988" y="144" width="30" height="4" fill="#0284c7" rx="1"/>
+      <text x="1003" y="162" font-family="sans-serif" font-size="7.5" fill="#0284c7" text-anchor="middle" font-weight="bold">LED Xanh</text>
+      
+      <!-- Resistor 330 Ohm -->
+      <rect x="945" y="180" width="48" height="14" rx="3" fill="#fde68a" stroke="#d97706" stroke-width="1"/>
+      <line x1="955" y1="180" x2="955" y2="194" stroke="#ea580c" stroke-width="2.5"/>
+      <line x1="964" y1="180" x2="964" y2="194" stroke="#ea580c" stroke-width="2.5"/>
+      <line x1="973" y1="180" x2="973" y2="194" stroke="#78350f" stroke-width="2.5"/>
+      <line x1="982" y1="180" x2="982" y2="194" stroke="#ca8a04" stroke-width="2"/>
+      <text x="969" y="208" font-family="sans-serif" font-size="8" fill="#78350f" text-anchor="middle" font-weight="bold">Trở 330Ω</text>
+    </g>
+<circle cx="870" cy="140" r="5" fill="#f97316" stroke="#c2410c" stroke-width="1"/>
+<text x="880" y="144" font-family="sans-serif" font-size="8.5" fill="#c2410c" font-weight="bold">Anode (+) Trở 330Ω</text>
+<circle cx="870" cy="200" r="5" fill="#1e293b" stroke="#0f172a" stroke-width="1"/>
+<text x="880" y="204" font-family="sans-serif" font-size="8.5" fill="#1e293b" font-weight="bold">Cathode (-) Nối GND</text>
+<g id="tp4056" filter="url(#shadow)">
+      <rect x="860" y="270" width="195" height="160" rx="6" fill="#1e3a8a" stroke="#1d4ed8" stroke-width="2"/>
+      <rect x="860" y="270" width="195" height="28" rx="6" fill="#1e40af"/>
+      <text x="957.5" y="289" font-family="Times New Roman, serif" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="bold">MẠCH SẠC TYPE-C (TP4056)</text>
+      
+      <!-- Type-C port on right edge -->
+      <rect x="1041" y="338" width="20" height="32" rx="4" fill="url(#usbGrad)" stroke="#64748b" stroke-width="1.5"/>
+      <rect x="1045" y="346" width="12" height="16" rx="2" fill="#334155"/>
+      <text x="957.5" y="312" font-family="sans-serif" font-size="8" fill="#93c5fd" text-anchor="middle">Bảo vệ sạc &amp; xả Pin LiPo</text>
+      <!-- IC chip -->
+      <rect x="932" y="335" width="38" height="38" rx="2" fill="#0f172a" stroke="#475569"/>
+      <text x="951" y="358" font-family="sans-serif" font-size="8" fill="#f8fafc" text-anchor="middle" font-weight="bold">TP4056</text>
+    </g>
+<circle cx="870" cy="328" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="870" cy="328" r="2.5" fill="#0f172a"/>
+<text x="882" y="331.5" font-family="sans-serif" font-size="9" fill="#ffffff" font-weight="bold">OUT+</text>
+<circle cx="870" cy="352" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="870" cy="352" r="2.5" fill="#0f172a"/>
+<text x="882" y="355.5" font-family="sans-serif" font-size="9" fill="#ffffff" font-weight="bold">OUT-</text>
+<circle cx="870" cy="382" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="870" cy="382" r="2.5" fill="#0f172a"/>
+<text x="882" y="385.5" font-family="sans-serif" font-size="9" fill="#ffffff" font-weight="bold">B+</text>
+<circle cx="870" cy="406" r="5" fill="url(#goldGrad)" stroke="#b45309" stroke-width="1"/>
+<circle cx="870" cy="406" r="2.5" fill="#0f172a"/>
+<text x="882" y="409.5" font-family="sans-serif" font-size="9" fill="#ffffff" font-weight="bold">B-</text>
+<g id="lipo_battery" filter="url(#shadow)">
+      <rect x="860" y="465" width="195" height="165" rx="6" fill="#eab308" stroke="#ca8a04" stroke-width="2"/>
+      <rect x="860" y="465" width="195" height="28" rx="6" fill="#ca8a04"/>
+      <text x="957.5" y="484" font-family="Times New Roman, serif" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="bold">PIN LiPo 3.7V 200mAh</text>
+      
+      <rect x="915" y="501" width="130" height="120" rx="3" fill="#ffffff"/>
+      <text x="980" y="525" font-family="sans-serif" font-size="11" fill="#0f172a" text-anchor="middle" font-weight="bold">MOTOMA</text>
+      <text x="980" y="545" font-family="sans-serif" font-size="8.5" fill="#1e293b" text-anchor="middle">3.7V LIP402226</text>
+      <text x="980" y="563" font-family="sans-serif" font-size="8.5" fill="#475569" text-anchor="middle">200mAh 0.74Wh</text>
+      <text x="980" y="587" font-family="sans-serif" font-size="7.5" fill="#16a34a" text-anchor="middle" font-weight="bold">Tích hợp PCM</text>
+    </g>
+<circle cx="870" cy="527" r="5" fill="#dc2626" stroke="#991b1b" stroke-width="1"/>
+<text x="878" y="531" font-family="sans-serif" font-size="7.5" fill="#dc2626" font-weight="bold">Đỏ (+)</text>
+<circle cx="870" cy="560" r="5" fill="#1e293b" stroke="#0f172a" stroke-width="1"/>
+<text x="878" y="564" font-family="sans-serif" font-size="7.5" fill="#1e293b" font-weight="bold">Đen (-)</text>
+<g id="wires">
+<path d="M 220 181 C 345.0 181, 345.0 374, 470 374" fill="none" stroke="#eab308" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 220 164 C 345.0 164, 345.0 400, 470 400" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 220 130 C 320 130, 550 170, 710 298 C 690 348, 650 348, 630 348" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M 220 147 C 300 147, 540 190, 690 282 C 670 322, 650 322, 630 322" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M 220 232 C 240 232, 240 192, 220 147" fill="none" stroke="#1e293b" stroke-width="1.8"/>
+<path d="M 220 373 C 345.0 373, 345.0 322, 470 322" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 220 399 C 280 399, 400 370, 420 370 C 430 370, 440 230, 560 230 C 650 230, 680 338, 630 348" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="4,2"/>
+<path d="M 220 425 C 270 425, 390 400, 410 400 C 430 400, 435 220, 560 220 C 660 220, 680 312, 630 322" fill="none" stroke="#1e293b" stroke-width="2" stroke-dasharray="4,2"/>
+<path d="M 220 553 C 345.0 553, 345.0 348, 470 348" fill="none" stroke="#9333ea" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 220 589 C 300 589, 400 580, 450 620 C 580 620, 680 490, 630 352 C 630 332, 630 327, 630 322" fill="none" stroke="#1e293b" stroke-width="2"/>
+<path d="M 870 140 C 770 140, 600 70, 500 70 C 400 70, 430 256, 470 296" fill="none" stroke="#ea580c" stroke-width="2.5"/>
+<path d="M 870 200 C 750.0 200, 750.0 322, 630 322" fill="none" stroke="#1e293b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 870 328 C 750.0 328, 750.0 296, 630 296" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 870 352 C 750.0 352, 750.0 322, 630 322" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 870 527 C 870.0 527, 870.0 382, 870 382" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 870 560 C 870.0 560, 870.0 406, 870 406" fill="none" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 870 382 C 780 395, 750 452, 630 452" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="3,3"/>
+</g>
+<g id="legend" filter="url(#shadow)">
+      <rect x="240" y="680" width="620" height="96" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+      <text x="550.0" y="699" font-family="Times New Roman, serif" font-size="12" fill="#0f172a" text-anchor="middle" font-weight="bold">BẢNG QUY ƯỚC MÀU DÂY VÀ CHÂN TÍN HIỆU</text>
+      
+      <!-- Row 1 -->
+      <line x1="270" y1="720" x2="300" y2="720" stroke="#dc2626" stroke-width="3"/>
+      <text x="308" y="723" font-family="sans-serif" font-size="9.5" fill="#334155"><tspan font-weight="bold" fill="#dc2626">Đỏ</tspan>: Nguồn Dương (3.3V / 5V / BAT+)</text>
+      
+      <line x1="580" y1="720" x2="610" y2="720" stroke="#1e293b" stroke-width="3"/>
+      <text x="618" y="723" font-family="sans-serif" font-size="9.5" fill="#334155"><tspan font-weight="bold" fill="#1e293b">Đen</tspan>: Nối Đất (GND / BAT- / OUT-)</text>
+      
+      <!-- Row 2 -->
+      <line x1="270" y1="741" x2="300" y2="741" stroke="#eab308" stroke-width="3"/>
+      <text x="308" y="744" font-family="sans-serif" font-size="9.5" fill="#334155"><tspan font-weight="bold" fill="#ca8a04">Vàng</tspan>: Dữ liệu I2C SDA (GPIO 8)</text>
+      
+      <line x1="580" y1="741" x2="610" y2="744" stroke="#2563eb" stroke-width="3"/>
+      <text x="618" y="744" font-family="sans-serif" font-size="9.5" fill="#334155"><tspan font-weight="bold" fill="#2563eb">Xanh Dương</tspan>: Xung I2C SCL (GPIO 9)</text>
+      
+      <!-- Row 3 -->
+      <line x1="270" y1="762" x2="300" y2="762" stroke="#16a34a" stroke-width="3"/>
+      <text x="308" y="765" font-family="sans-serif" font-size="9.5" fill="#334155"><tspan font-weight="bold" fill="#16a34a">Xanh Lá</tspan>: Kích Rung PWM (GPIO 6)</text>
+      
+      <line x1="580" y1="762" x2="610" y2="762" stroke="#9333ea" stroke-width="3"/>
+      <text x="618" y="765" font-family="sans-serif" font-size="9.5" fill="#334155"><tspan font-weight="bold" fill="#9333ea">Tím</tspan>: Kích Còi (GPIO 7) &amp; <tspan font-weight="bold" fill="#ea580c">Cam</tspan>: LED (GPIO 5)</text>
+    </g>
+</svg>

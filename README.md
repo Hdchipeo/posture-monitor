@@ -51,8 +51,8 @@
 > ### 📚 IN-DEPTH TECHNICAL DOCUMENTATION & SYSTEM GUIDES
 > 1. **Software Architecture & Program Flow**: [`docs/software_architecture.md`](docs/software_architecture.md) | [**PDF Guide**](docs/software_block_diagram.pdf)  
 >    *Layered architecture, 6-state FSM, sequence diagram, dual-OTA anti-bricking, web monitor engine.*
-> 2. **Hardware Schematic & Wiring Guide**: [`docs/hardware_schematic.md`](docs/hardware_schematic.md) | [**PDF Guide**](docs/hardware_block_diagram.pdf)  
->    *Block diagram, detailed schematics, pinout mapping (ESP32-C3 & Classic), MOSFET/BJT/diode circuits.*
+> 2. **Hardware Schematic & Wiring Guide**: [`docs/hardware_schematic.md`](docs/hardware_schematic.md) | [**Physical Wiring PDF**](docs/hardware_wiring_guide.pdf) | [**Schematic PDF**](docs/hardware_block_diagram.pdf)  
+>    *Detailed schematic, ESP32-C3 SuperMini pinout, 3-pin vibration module, buzzer, LiPo & Type-C wiring.*
 > 3. **Theoretical Basis & Mathematical Derivation**: [`docs/theoretical_basis.md`](docs/theoretical_basis.md) | [**PDF Guide**](docs/theoretical_basis.pdf)  
 >    *Spinal biomechanics, co-phase derivative proof $\frac{d\theta}{dt} = +g_y$, relative Yaw extraction, 3D kinematics.*
 > 4. **User & Operation Manual**: [`docs/user_manual.md`](docs/user_manual.md) | [**PDF Manual**](docs/user_manual.pdf) | [**Word DOCX**](docs/user_manual.docx)  
@@ -60,7 +60,7 @@
 > 5. **Arduino Modular Code Guide**: [`docs/arduino_code_guide.md`](docs/arduino_code_guide.md) | [**PDF Guide**](docs/arduino_code_guide.pdf)  
 >    *Block-by-block source code breakdown, 5 standalone modules, non-blocking millis() timing architecture.*
 > 6. **Visual Vector Diagrams**:  
->    • [Hardware Architecture](docs/images/hardware_block_diagram.svg) • [Software Flowchart](docs/images/software_block_diagram.svg) • [Biomechanics Kinematics](docs/images/biomechanics_diagram.svg) • [Arduino Code Map](docs/images/arduino_architecture_diagram.svg)
+>    • [ESP32-C3 Wiring Diagram](docs/images/esp32c3_wiring_diagram.svg) • [Hardware Architecture](docs/images/hardware_block_diagram.svg) • [Software Flowchart](docs/images/software_block_diagram.svg) • [Biomechanics Kinematics](docs/images/biomechanics_diagram.svg) • [Arduino Code Map](docs/images/arduino_architecture_diagram.svg)
 
 ---
 

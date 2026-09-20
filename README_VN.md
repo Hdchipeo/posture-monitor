@@ -51,8 +51,8 @@
 > ### 📚 TÀI LIỆU KỸ THUẬT CHUYÊN SÂU & HƯỚNG DẪN HỆ THỐNG
 > 1. **Kiến Trúc Phần Mềm & Luồng Chương Trình**: [`docs/software_architecture.md`](docs/software_architecture.md) | [**Tài Liệu PDF**](docs/software_block_diagram.pdf)  
 >    *Phân tầng module, FSM 6 trạng thái, Sequence Diagram, Dual-OTA Anti-Bricking, Web Monitor Engine.*
-> 2. **Sơ Đồ Phần Cứng & Kết Nối Mạch**: [`docs/hardware_schematic.md`](docs/hardware_schematic.md) | [**Tài Liệu PDF**](docs/hardware_block_diagram.pdf)  
->    *Sơ đồ khối, sơ đồ nguyên lý mạch, bảng phân bổ chân ESP32-C3 / Classic, linh kiện MOSFET/BJT/Diode.*
+> 2. **Sơ Đồ Phần Cứng & Hướng Dẫn Đi Dây**: [`docs/hardware_schematic.md`](docs/hardware_schematic.md) | [`docs/hardware_wiring_guide.md`](docs/hardware_wiring_guide.md) | [**PDF Đi Dây Thực Tế**](docs/hardware_wiring_guide.pdf)  
+>    *Bản vẽ đấu nối ESP32-C3 SuperMini, MPU6050, module rung 3 chân, còi buzzer, LED, sạc Type-C & pin LiPo.*
 > 3. **Cơ Sở Lý Thuyết & Phương Pháp Tính Toán**: [`docs/theoretical_basis.md`](docs/theoretical_basis.md) | [**Tài Liệu PDF**](docs/theoretical_basis.pdf)  
 >    *Cơ sinh học cột sống, chứng minh đồng pha vi phân bộ lọc bù $\frac{d\theta}{dt} = +g_y$, tích phân Yaw, 3D Kinematics.*
 > 4. **Hướng Dẫn Sử Dụng & Vận Hành**: [`docs/user_manual.md`](docs/user_manual.md) | [**Tài Liệu PDF**](docs/user_manual.pdf) | [**Tài Liệu Word DOCX**](docs/user_manual.docx)  
@@ -60,7 +60,7 @@
 > 5. **Hướng Dẫn Cấu Trúc Mã Nguồn Arduino**: [`docs/arduino_code_guide.md`](docs/arduino_code_guide.md) | [**Tài Liệu PDF**](docs/arduino_code_guide.pdf)  
 >    *Giải thích phân khối 5 module độc lập, nguyên tắc hoạt động không nghẽn với biến đếm millis().*
 > 6. **Sơ Đồ Đồ Họa Vector SVG**:  
->    • [Kiến Trúc Phần Cứng](docs/images/hardware_block_diagram.svg) • [Lưu Đồ Phần Mềm](docs/images/software_block_diagram.svg) • [Động Học Cơ Sinh](docs/images/biomechanics_diagram.svg) • [Phân Khối Arduino](docs/images/arduino_architecture_diagram.svg)
+>    • [Sơ Đồ Đi Dây ESP32-C3](docs/images/esp32c3_wiring_diagram.svg) • [Kiến Trúc Phần Cứng](docs/images/hardware_block_diagram.svg) • [Lưu Đồ Phần Mềm](docs/images/software_block_diagram.svg) • [Động Học Cơ Sinh](docs/images/biomechanics_diagram.svg) • [Phân Khối Arduino](docs/images/arduino_architecture_diagram.svg)
 
 ---
 
