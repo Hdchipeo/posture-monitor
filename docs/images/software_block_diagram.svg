@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 570" width="100%" height="100%">
+  <defs>
+    <filter id="shadow" x="-3%" y="-4%" width="106%" height="110%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.06"/>
+    </filter>
+    <marker id="arrow-sw" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#374151"/>
+    </marker>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="960" height="570" fill="#FFFFFF"/>
+  <rect x="12" y="12" width="936" height="546" rx="8" fill="#FAFAFA" stroke="#E5E7EB" stroke-width="1"/>
+
+  <!-- Diagram Title inside Box -->
+  <text x="480" y="46" text-anchor="middle" font-family="'Times New Roman', serif" font-size="17" font-weight="bold" fill="#111827">SƠ ĐỒ KHỐI PHẦN MỀM THIẾT BỊ GIÁM SÁT TƯ THẾ</text>
+  <text x="480" y="66" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12" fill="#6B7280">Kiến trúc các khối chức năng phần mềm và luồng xử lý dữ liệu</text>
+
+  <!-- ==================== TẦNG 1: THU NHẬN TÍN HIỆU (TOP) ==================== -->
+  <g filter="url(#shadow)">
+    <rect x="60" y="90" width="840" height="82" rx="6" fill="#F9FAFB" stroke="#4B5563" stroke-width="1.5"/>
+    <rect x="60" y="90" width="840" height="24" rx="6" fill="#374151"/>
+    <rect x="60" y="106" width="840" height="8" fill="#374151"/>
+    <text x="480" y="107" text-anchor="middle" font-family="'Times New Roman', serif" font-size="13" font-weight="bold" fill="#FFFFFF">1. TẦNG THU NHẬN VÀ LỌC TÍN HIỆU ĐẦU VÀO</text>
+    
+    <!-- Sub module 1 -->
+    <rect x="80" y="122" width="240" height="42" rx="4" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1"/>
+    <text x="200" y="139" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11.5" font-weight="bold" fill="#1F2937">Đọc Cảm Biến Góc Nghiêng</text>
+    <text x="200" y="156" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" fill="#4B5563">Góc cúi/ngửa, nghiêng vai, xoay người</text>
+    
+    <!-- Sub module 2 -->
+    <rect x="360" y="122" width="240" height="42" rx="4" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1"/>
+    <text x="480" y="139" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11.5" font-weight="bold" fill="#1F2937">Nhận Dạng Thao Tác Nút Bấm</text>
+    <text x="480" y="156" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" fill="#4B5563">Bấm đơn, bấm đúp, nhấn giữ 2 giây</text>
+
+    <!-- Sub module 3 -->
+    <rect x="640" y="122" width="240" height="42" rx="4" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1"/>
+    <text x="760" y="139" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11.5" font-weight="bold" fill="#1F2937">Theo Dõi Dung Lượng Pin</text>
+    <text x="760" y="156" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" fill="#4B5563">Tính toán phần trăm % và mức pin yếu</text>
+  </g>
+
+  <!-- Flow 1 -> 2 -->
+  <line x1="480" y1="172" x2="480" y2="207" stroke="#374151" stroke-width="2" marker-end="url(#arrow-sw)"/>
+  <rect x="410" y="181" width="140" height="17" rx="3" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+  <text x="480" y="193" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" font-weight="bold" fill="#374151">Dữ liệu góc nghiêng &amp; phím</text>
+
+  <!-- ==================== TẦNG 2: XỬ LÝ LÕI & ĐÁNH GIÁ TƯ THẾ (CENTER) ==================== -->
+  <g filter="url(#shadow)">
+    <rect x="180" y="211" width="600" height="112" rx="6" fill="#FFFFFF" stroke="#111827" stroke-width="2"/>
+    <rect x="180" y="211" width="600" height="26" rx="6" fill="#1F2937"/>
+    <rect x="180" y="229" width="600" height="8" fill="#1F2937"/>
+    <text x="480" y="230" text-anchor="middle" font-family="'Times New Roman', serif" font-size="13.5" font-weight="bold" fill="#FFFFFF">2. TẦNG PHÂN TÍCH VÀ ĐÁNH GIÁ TƯ THẾ</text>
+
+    <text x="480" y="258" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12" font-weight="bold" fill="#1F2937">• So sánh dáng ngồi hiện tại với "Mốc Tư Thế Chuẩn" đã lưu</text>
+    <text x="480" y="278" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11.5" fill="#374151">• Bộ đếm thông minh lọc nhiễu cúi người tạm thời (chờ 5 giây trước khi nhắc)</text>
+    <text x="480" y="297" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11.5" fill="#374151">• Xác định 3 cấp độ: Ngồi đúng  -  Cảnh báo nhẹ  -  Báo động sai tư thế kéo dài</text>
+    <text x="480" y="315" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11" fill="#4B5563">• Tính toán điểm chất lượng tư thế (0 đến 100 điểm) theo thời gian thực</text>
+  </g>
+
+  <!-- Branch left to Layer 3, Branch right to Layer 4 -->
+  <path d="M 330 323 L 330 358 L 260 358 L 260 374" fill="none" stroke="#374151" stroke-width="2" marker-end="url(#arrow-sw)"/>
+  <path d="M 630 323 L 630 358 L 700 358 L 700 374" fill="none" stroke="#374151" stroke-width="2" marker-end="url(#arrow-sw)"/>
+
+  <!-- ==================== TẦNG 3: ĐIỀU KHIỂN CẢNH BÁO & LƯU TRỮ (BOTTOM-LEFT) ==================== -->
+  <g filter="url(#shadow)">
+    <rect x="60" y="378" width="400" height="156" rx="6" fill="#F9FAFB" stroke="#4B5563" stroke-width="1.5"/>
+    <rect x="60" y="378" width="400" height="24" rx="6" fill="#374151"/>
+    <rect x="60" y="394" width="400" height="8" fill="#374151"/>
+    <text x="260" y="395" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12" font-weight="bold" fill="#FFFFFF">3. TẦNG PHẢN HỒI CẢNH BÁO VÀ LƯU TRỮ</text>
+
+    <text x="260" y="421" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11.5" font-weight="bold" fill="#1F2937">Khối Quản Lý Rung &amp; Còi Báo Động</text>
+    <text x="260" y="438" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" fill="#374151">• Phát nhịp rung nhẹ, rung dồn dập hoặc ngắt quãng</text>
+    <text x="260" y="454" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" fill="#374151">• Điều khiển nhịp chớp đèn LED theo trạng thái làm việc</text>
+    
+    <line x1="80" y1="466" x2="440" y2="466" stroke="#E5E7EB" stroke-width="1"/>
+
+    <text x="260" y="486" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11.5" font-weight="bold" fill="#1F2937">Khối Lưu Trữ Cài Đặt (Bộ Nhớ Trong)</text>
+    <text x="260" y="503" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" fill="#374151">• Lưu vĩnh viễn dáng ngồi chuẩn đã hiệu chuẩn</text>
+    <text x="260" y="520" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" fill="#4B5563">• Giữ nguyên thông tin cài đặt kể cả khi tắt nguồn</text>
+  </g>
+
+  <!-- ==================== TẦNG 4: KẾT NỐI & TRANG WEB (BOTTOM-RIGHT) ==================== -->
+  <g filter="url(#shadow)">
+    <rect x="500" y="378" width="400" height="156" rx="6" fill="#F9FAFB" stroke="#4B5563" stroke-width="1.5"/>
+    <rect x="500" y="378" width="400" height="24" rx="6" fill="#374151"/>
+    <rect x="500" y="394" width="400" height="8" fill="#374151"/>
+    <text x="700" y="395" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12" font-weight="bold" fill="#FFFFFF">4. TẦNG KẾT NỐI KHÔNG DÂY VÀ TRANG WEB</text>
+
+    <text x="700" y="421" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11.5" font-weight="bold" fill="#1F2937">Khối Phát Sóng Wi-Fi &amp; Máy Chủ Nội Bộ</text>
+    <text x="700" y="438" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" fill="#374151">• Phát mạng Wi-Fi cục bộ (không cần Internet)</text>
+    <text x="700" y="454" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" fill="#374151">• Truyền dữ liệu tư thế trực tiếp 10 lần mỗi giây</text>
+
+    <line x1="520" y1="466" x2="880" y2="466" stroke="#E5E7EB" stroke-width="1"/>
+
+    <text x="700" y="486" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11.5" font-weight="bold" fill="#1F2937">Giao Diện Web Monitor Trên Trình Duyệt</text>
+    <text x="700" y="503" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" fill="#374151">• Hiển thị mô hình 3D cột sống theo thời gian thực</text>
+    <text x="700" y="520" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" fill="#4B5563">• Nút bấm hiệu chuẩn dáng ngồi &amp; Nâng cấp phần mềm</text>
+  </g>
+
+  <!-- Bi-directional sync between alert/storage & web server -->
+  <line x1="460" y1="455" x2="496" y2="455" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrow-sw)"/>
+  <line x1="500" y1="455" x2="464" y2="455" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrow-sw)"/>
+
+</svg>

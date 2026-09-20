@@ -27,17 +27,40 @@
 
 </div>
 
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="33%">
+        <img src="docs/images/device_perspective.png" alt="Perspective 3D Render" width="100%" /><br/>
+        <b>Isometric 3D View</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="docs/images/device_front.png" alt="Front Interface" width="100%" /><br/>
+        <b>Front Interface & Tactile Button</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="docs/images/device_side_clip.png" alt="Side & Clip View" width="100%" /><br/>
+        <b>Ergonomic Clip & USB-C Port</b>
+      </td>
+    </tr>
+  </table>
+</div>
+
 ---
 
-> ### 📚 IN-DEPTH TECHNICAL DOCUMENTATION
-> 1. **Software Architecture & Program Flow**: [`docs/software_architecture.md`](docs/software_architecture.md)  
+> ### 📚 IN-DEPTH TECHNICAL DOCUMENTATION & SYSTEM GUIDES
+> 1. **Software Architecture & Program Flow**: [`docs/software_architecture.md`](docs/software_architecture.md) | [**PDF Guide**](docs/software_block_diagram.pdf)  
 >    *Layered architecture, 6-state FSM, sequence diagram, dual-OTA anti-bricking, web monitor engine.*
-> 2. **Hardware Schematic & Wiring Guide**: [`docs/hardware_schematic.md`](docs/hardware_schematic.md)  
+> 2. **Hardware Schematic & Wiring Guide**: [`docs/hardware_schematic.md`](docs/hardware_schematic.md) | [**PDF Guide**](docs/hardware_block_diagram.pdf)  
 >    *Block diagram, detailed schematics, pinout mapping (ESP32-C3 & Classic), MOSFET/BJT/diode circuits.*
-> 3. **Theoretical Basis & Mathematical Derivation**: [`docs/theoretical_basis.md`](docs/theoretical_basis.md)  
+> 3. **Theoretical Basis & Mathematical Derivation**: [`docs/theoretical_basis.md`](docs/theoretical_basis.md) | [**PDF Guide**](docs/theoretical_basis.pdf)  
 >    *Spinal biomechanics, co-phase derivative proof $\frac{d\theta}{dt} = +g_y$, relative Yaw extraction, 3D kinematics.*
-> 4. **User & Operation Manual**: [`docs/user_manual.md`](docs/user_manual.md)  
+> 4. **User & Operation Manual**: [`docs/user_manual.md`](docs/user_manual.md) | [**PDF Manual**](docs/user_manual.pdf) | [**Word DOCX**](docs/user_manual.docx)  
 >    *Medical wearing guide, diagnostic LED codes, physical button gestures, Wi-Fi Web Monitor & OTA guide.*
+> 5. **Arduino Modular Code Guide**: [`docs/arduino_code_guide.md`](docs/arduino_code_guide.md) | [**PDF Guide**](docs/arduino_code_guide.pdf)  
+>    *Block-by-block source code breakdown, 5 standalone modules, non-blocking millis() timing architecture.*
+> 6. **Visual Vector Diagrams**:  
+>    • [Hardware Architecture](docs/images/hardware_block_diagram.svg) • [Software Flowchart](docs/images/software_block_diagram.svg) • [Biomechanics Kinematics](docs/images/biomechanics_diagram.svg) • [Arduino Code Map](docs/images/arduino_architecture_diagram.svg)
 
 ---
 
@@ -61,6 +84,11 @@ The sensor is mechanically aligned along the upper thoracic spine (vertebrae T1�
                 | /
                 +------> X (Coronal axis, Lateral)
 ```
+
+<div align="center">
+  <img src="docs/images/biomechanics_diagram.svg" width="92%" alt="Biomechanical Coordinate System & Spinal Kinematics" /><br/>
+  <em>Figure: Biomechanical coordinate frame, sagittal flexion angle, and lateral tilt derivation</em>
+</div>
 
 ### 2.1 Gravitational Projection & Accelerometer Inclination
 
@@ -125,6 +153,11 @@ An abnormal posture condition is triggered if and only if $e_k > \theta_{\text{t
             [ Mini Motor ]                            [ Buzzer ]
             [ + 1N5819   ]                            [ + Resistor ]
 ```
+
+<div align="center">
+  <img src="docs/images/hardware_block_diagram.svg" width="95%" alt="Hardware Block Diagram" /><br/>
+  <em>Figure: Electrical subsystem interconnects, power management rail, and peripheral isolation</em>
+</div>
 
 ### 3.2 Electrical Interfacing Guidelines
 
@@ -199,6 +232,11 @@ Each component encapsulates its technical documentation in both English and Viet
 - [`storage_manager`](components/storage_manager/README_EN.md) ([Tiếng Việt](components/storage_manager/README_VN.md)): NVS driver with IEEE 802.3 CRC32 integrity verification.
 - [`button_ctrl`](components/button_ctrl/README_EN.md) ([Tiếng Việt](components/button_ctrl/README_VN.md)): Event dispatches for single click, double click, and long press.
 
+<div align="center">
+  <img src="docs/images/software_block_diagram.svg" width="92%" alt="Software Architecture Block Diagram" /><br/>
+  <em>Figure: Layered software architecture, FreeRTOS tasks, and non-blocking event dispatchers</em>
+</div>
+
 ---
 
 ## 5. Finite State Machine & Alert Escalation
@@ -234,7 +272,34 @@ stateDiagram-v2
 
 ---
 
-## 6. Configuration (Menuconfig)
+## 6. Real-Time Web Monitor & Wireless Telemetry
+
+The system hosts an integrated HTTP server and captive Web Dashboard directly on the ESP32-C3 SoftAP, enabling zero-install real-time posture visualization on any smartphone or laptop:
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="50%">
+        <img src="docs/images/web_monitor_mobile.png" alt="Mobile Web Monitor (Vietnamese)" width="280px" /><br/>
+        <b>Real-Time Mobile Web Monitor (Vietnamese)</b>
+      </td>
+      <td align="center" width="50%">
+        <img src="docs/images/web_monitor_mobile_en.png" alt="Mobile Web Monitor (English)" width="280px" /><br/>
+        <b>Real-Time Mobile Web Monitor (English)</b>
+      </td>
+    </tr>
+  </table>
+</div>
+
+### Key Web Features:
+- **3D Interactive Skeleton Visualizer**: Real-time 3D spinal column animation mirroring your posture orientation via touch drag/zoom gestures.
+- **Biometric Telemetry**: Real-time Euler angles (Flexion/Slouch, Lateral Tilt, Axial Rotation) and cumulative Posture Score ($0 - 100$).
+- **Wireless Tare Calibration & Snooze**: Trigger zero-reference recalibration or activate a 10-minute snooze timer directly from the web interface.
+- **Dual-Bank OTA Firmware Flasher**: Upgrade firmware binaries wirelessly over Wi-Fi with automatic SHA-256 validation and fail-safe rollback.
+
+---
+
+## 7. Configuration (Menuconfig)
 
 All operational parameters can be customized without editing code by executing:
 
@@ -255,13 +320,13 @@ Navigate to **Posture Monitor Configuration**:
 
 ---
 
-## 7. Getting Started & Flashing
+## 8. Getting Started & Flashing
 
-### 7.1 Prerequisites
+### 8.1 Prerequisites
 - ESP-IDF v5.0 or later installed (`v5.5` recommended).
 - USB-to-UART bridge connected to ESP32-C3.
 
-### 7.2 Compilation & Deployment
+### 8.2 Compilation & Deployment
 
 ```bash
 # 1. Export ESP-IDF environment variables
@@ -277,14 +342,14 @@ idf.py build
 idf.py -p /dev/ttyUSB0 flash monitor
 ```
 
-### 7.3 Operational Protocol
+### 8.3 Operational Protocol
 1. **Attachment**: Affix the device securely between shoulder blades (T1–T4 vertebrae).
 2. **Calibration (Tare)**: Assume an upright, ergonomically optimal posture and press the push button for $>2$ seconds. A confirmation pulse signifies that the baseline angle has been calculated and written to NVS.
 3. **Snooze**: Double-click the button to mute alerts for 10 minutes when standing up or taking a break.
 
 ---
 
-## 8. Verification & Benchmarks
+## 9. Verification & Benchmarks
 
 | Metric | Measured Value | Requirement / Boundary | Status |
 | :--- | :--- | :--- | :--- |
@@ -297,6 +362,6 @@ idf.py -p /dev/ttyUSB0 flash monitor
 
 ---
 
-## 9. License
+## 10. License
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for complete details.

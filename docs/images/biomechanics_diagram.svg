@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="100%" height="100%">
+  <defs>
+    <filter id="shadow" x="-3%" y="-4%" width="106%" height="110%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.06"/>
+    </filter>
+    <marker id="arrow-bio" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#374151"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1D4ED8"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#991B1B"/>
+    </marker>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="960" height="560" fill="#FFFFFF"/>
+  <rect x="12" y="12" width="936" height="536" rx="8" fill="#FAFAFA" stroke="#E5E7EB" stroke-width="1"/>
+
+  <!-- Diagram Title -->
+  <text x="480" y="44" text-anchor="middle" font-family="'Times New Roman', serif" font-size="17" font-weight="bold" fill="#111827">MÔ HÌNH CƠ SINH HỌC VÀ NGUYÊN LÝ ĐO LƯỜNG TƯ THẾ</text>
+  <text x="480" y="64" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12" fill="#6B7280">Các trục biến dạng cột sống và nguyên lý xác định độ nghiêng bằng trọng lực</text>
+
+  <!-- ==================== KHỐI 1: 3 GÓC LỆCH TƯ THẾ (TOP 3 CARDS) ==================== -->
+
+  <!-- Card 1: Góc Cúi / Ngửa Lưng -->
+  <g filter="url(#shadow)">
+    <rect x="35" y="88" width="280" height="225" rx="6" fill="#FFFFFF" stroke="#4B5563" stroke-width="1.5"/>
+    <rect x="35" y="88" width="280" height="26" rx="6" fill="#374151"/>
+    <rect x="35" y="106" width="280" height="8" fill="#374151"/>
+    <text x="175" y="106" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12.5" font-weight="bold" fill="#FFFFFF">1. GÓC CÚI / NGỬA LƯNG</text>
+    
+    <!-- Vertical neutral line -->
+    <line x1="175" y1="130" x2="175" y2="215" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <text x="175" y="126" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9.5" fill="#6B7280">Trục thẳng đứng chuẩn (0°)</text>
+    
+    <!-- Slouched curved spine -->
+    <path d="M 175 215 Q 170 170 135 140" fill="none" stroke="#1F2937" stroke-width="3"/>
+    <!-- Sensor on upper back -->
+    <rect x="144" y="158" width="12" height="18" rx="2" fill="#4B5563" transform="rotate(-30 150 167)"/>
+    <!-- Angle arc -->
+    <path d="M 175 160 A 55 55 0 0 0 152 165" fill="none" stroke="#991B1B" stroke-width="1.5"/>
+    <text x="170" y="178" font-family="'Times New Roman', serif" font-size="10.5" font-weight="bold" fill="#991B1B">Góc gù (+20°)</text>
+
+    <!-- Head and base dots -->
+    <circle cx="132" cy="137" r="6" fill="#4B5563"/>
+    <circle cx="175" cy="215" r="5" fill="#1F2937"/>
+
+    <text x="175" y="240" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#111827">Hiện tượng gù lưng (Slouching)</text>
+    <text x="175" y="258" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Lưng trên gập về trước khi dùng máy tính</text>
+    <text x="175" y="274" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Tăng áp lực lên đĩa đệm và cổ gấp 3-4 lần</text>
+    <text x="175" y="290" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#991B1B">• Ngưỡng cảnh báo: Lệch quá 12° sau 5 giây</text>
+  </g>
+
+  <!-- Card 2: Góc Nghiêng Vai -->
+  <g filter="url(#shadow)">
+    <rect x="340" y="88" width="280" height="225" rx="6" fill="#FFFFFF" stroke="#4B5563" stroke-width="1.5"/>
+    <rect x="340" y="88" width="280" height="26" rx="6" fill="#374151"/>
+    <rect x="340" y="106" width="280" height="8" fill="#374151"/>
+    <text x="480" y="106" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12.5" font-weight="bold" fill="#FFFFFF">2. GÓC NGHIÊNG HAI VAI</text>
+
+    <!-- Horizontal balanced line -->
+    <line x1="410" y1="165" x2="550" y2="165" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <text x="480" y="126" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9.5" fill="#6B7280">Hai vai cân bằng ngang</text>
+
+    <!-- Tilted shoulders bar -->
+    <line x1="415" y1="150" x2="545" y2="180" stroke="#1F2937" stroke-width="3"/>
+    <!-- Head in center -->
+    <circle cx="480" cy="145" r="7" fill="#4B5563"/>
+    <circle cx="415" cy="150" r="5" fill="#1F2937"/>
+    <circle cx="545" cy="180" r="5" fill="#1F2937"/>
+    <!-- Spine vertical line -->
+    <line x1="480" y1="165" x2="480" y2="215" stroke="#1F2937" stroke-width="2"/>
+    <!-- Angle arc -->
+    <path d="M 535 165 A 55 55 0 0 1 532 177" fill="none" stroke="#991B1B" stroke-width="1.5"/>
+    <text x="515" y="196" font-family="'Times New Roman', serif" font-size="10.5" font-weight="bold" fill="#991B1B">Lệch vai (10°)</text>
+
+    <text x="480" y="240" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#111827">Hiện tượng vẹo người một bên</text>
+    <text x="480" y="258" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Thường gặp khi tì tay không đều, chống cằm</text>
+    <text x="480" y="274" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Gây cong vẹo cột sống ngực và đau mỏi</text>
+    <text x="480" y="290" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#991B1B">• Ngưỡng cảnh báo: Nghiêng lệch quá 8°</text>
+  </g>
+
+  <!-- Card 3: Góc Xoay Vặn Thân Người -->
+  <g filter="url(#shadow)">
+    <rect x="645" y="88" width="280" height="225" rx="6" fill="#FFFFFF" stroke="#4B5563" stroke-width="1.5"/>
+    <rect x="645" y="88" width="280" height="26" rx="6" fill="#374151"/>
+    <rect x="645" y="106" width="280" height="8" fill="#374151"/>
+    <text x="785" y="106" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12.5" font-weight="bold" fill="#FFFFFF">3. GÓC XOAY THÂN NGƯỜI</text>
+
+    <!-- Chest ellipse neutral -->
+    <ellipse cx="785" cy="165" rx="45" ry="18" fill="none" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <text x="785" y="126" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9.5" fill="#6B7280">Mắt và ngực nhìn thẳng</text>
+
+    <!-- Rotated ellipse -->
+    <ellipse cx="785" cy="165" rx="45" ry="18" fill="none" stroke="#1F2937" stroke-width="2.5" transform="rotate(-25 785 165)"/>
+    <!-- Rotation arrow -->
+    <path d="M 810 145 A 35 20 0 0 0 760 145" fill="none" stroke="#991B1B" stroke-width="1.8" marker-end="url(#arrow-red)"/>
+    <circle cx="785" cy="165" r="5" fill="#1F2937"/>
+    <text x="785" y="196" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" font-weight="bold" fill="#991B1B">Xoay vặn trục (15°)</text>
+
+    <text x="785" y="240" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#111827">Hiện tượng xoay vẹo cột sống</text>
+    <text x="785" y="258" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Xảy ra khi màn hình đặt lệch một bên bàn</text>
+    <text x="785" y="274" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Làm xoắn các cơ cạnh sống và đĩa đệm</text>
+    <text x="785" y="290" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#991B1B">• Theo dõi liên tục và hiển thị trên mô hình 3D</text>
+  </g>
+
+  <!-- ==================== KHỐI 2: NGUYÊN LÝ TRỌNG LỰC & CHU TRÌNH ĐÁNH GIÁ (BOTTOM) ==================== -->
+  
+  <!-- Left Half of Bottom: Nguyên lý đo bằng Trọng Lực Trái Đất -->
+  <g filter="url(#shadow)">
+    <rect x="35" y="330" width="430" height="200" rx="6" fill="#F9FAFB" stroke="#4B5563" stroke-width="1.5"/>
+    <rect x="35" y="330" width="430" height="26" rx="6" fill="#374151"/>
+    <rect x="35" y="348" width="430" height="8" fill="#374151"/>
+    <text x="250" y="348" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12.5" font-weight="bold" fill="#FFFFFF">NGUYÊN LÝ ĐO GÓC BẰNG TRỌNG LỰC TỰ NHIÊN</text>
+
+    <!-- Side view diagram: Device box at x=65 -->
+    <rect x="58" y="375" width="22" height="38" rx="3" fill="#1F2937"/>
+    <circle cx="69" cy="384" r="2.5" fill="#10B981"/>
+    <text x="69" y="426" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9" font-weight="bold" fill="#1F2937">Thiết bị</text>
+    <text x="69" y="437" text-anchor="middle" font-family="'Times New Roman', serif" font-size="8" fill="#4B5563">(Gắn dọc lưng)</text>
+
+    <!-- Gravity arrow downwards -->
+    <line x1="69" y1="444" x2="69" y2="486" stroke="#1D4ED8" stroke-width="2" marker-end="url(#arrow-blue)"/>
+    <text x="69" y="498" text-anchor="middle" font-family="'Times New Roman', serif" font-size="8.5" font-weight="bold" fill="#1D4ED8">Trọng lực Trái Đất</text>
+    <text x="69" y="508" text-anchor="middle" font-family="'Times New Roman', serif" font-size="8" fill="#1E40AF">(Luôn hướng xuống)</text>
+
+    <!-- Clear explanation text starting at x=135 -->
+    <text x="135" y="380" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#111827">Cơ chế đo góc không cần định vị phức tạp:</text>
+    <text x="135" y="400" font-family="'Times New Roman', serif" font-size="10.5" fill="#1F2937">1. <tspan font-weight="bold">Lưng ngồi thẳng</tspan>: Trọng lực song song với thân máy.</text>
+    <text x="135" y="418" font-family="'Times New Roman', serif" font-size="10.5" fill="#1F2937">2. <tspan font-weight="bold">Khi cúi hoặc nghiêng</tspan>: Máy nghiêng theo cột sống,</text>
+    <text x="135" y="434" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">    trọng lực chuyển dịch sang phương ngang của máy.</text>
+    <text x="135" y="452" font-family="'Times New Roman', serif" font-size="10.5" fill="#1F2937">3. <tspan font-weight="bold">Bộ vi xử lý</tspan> lập tức tính ra góc cúi và góc nghiêng</text>
+    <text x="135" y="468" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">    đối chiếu với mốc dáng chuẩn riêng của từng người.</text>
+
+    <line x1="135" y1="482" x2="445" y2="482" stroke="#E5E7EB" stroke-width="1"/>
+    <text x="290" y="500" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9.5" fill="#047857" font-weight="bold">Độ nhạy cực cao (chính xác 0.5 độ) - Hoạt động độc lập không cần Internet</text>
+  </g>
+
+  <!-- Right Half of Bottom: Chu trình đánh giá & Chống báo động giả -->
+  <g filter="url(#shadow)">
+    <rect x="495" y="330" width="430" height="200" rx="6" fill="#F9FAFB" stroke="#4B5563" stroke-width="1.5"/>
+    <rect x="495" y="330" width="430" height="26" rx="6" fill="#374151"/>
+    <rect x="495" y="348" width="430" height="8" fill="#374151"/>
+    <text x="710" y="348" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12.5" font-weight="bold" fill="#FFFFFF">QUY TRÌNH ĐÁNH GIÁ VÀ BỘ ĐỆM 5 GIÂY THÔNG MINH</text>
+
+    <!-- Step A: Hiệu chuẩn mốc -->
+    <rect x="515" y="375" width="180" height="38" rx="4" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1"/>
+    <text x="605" y="391" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" font-weight="bold" fill="#1F2937">BƯỚC 1: LẤY MỐC CHUẨN</text>
+    <text x="605" y="405" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9.5" fill="#4B5563">Nhấn giữ 2s để lưu dáng ngồi của bạn</text>
+
+    <!-- Arrow right -->
+    <line x1="695" y1="394" x2="731" y2="394" stroke="#4B5563" stroke-width="1.5" marker-end="url(#arrow-bio)"/>
+
+    <!-- Step B: Đo góc liên tục -->
+    <rect x="735" y="375" width="175" height="38" rx="4" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1"/>
+    <text x="822" y="391" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" font-weight="bold" fill="#1F2937">BƯỚC 2: THEO DÕI 50 LẦN/S</text>
+    <text x="822" y="405" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9.5" fill="#4B5563">Đo liên tục độ nghiêng cơ thể</text>
+
+    <!-- Arrow down -->
+    <path d="M 822 413 L 822 433 L 605 433 L 605 443" fill="none" stroke="#4B5563" stroke-width="1.5" marker-end="url(#arrow-bio)"/>
+
+    <!-- Step C: Bộ lọc trễ 5 giây -->
+    <rect x="515" y="445" width="180" height="42" rx="4" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1"/>
+    <text x="605" y="461" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10.5" font-weight="bold" fill="#92400E">BƯỚC 3: ĐỆM TRỄ 5 GIÂY</text>
+    <text x="605" y="476" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9" fill="#B45309">Cúi nhặt đồ tạm thời: Không rung</text>
+
+    <!-- Arrow right -->
+    <line x1="695" y1="466" x2="731" y2="466" stroke="#4B5563" stroke-width="1.5" marker-end="url(#arrow-bio)"/>
+
+    <!-- Step D: Rung nhắc nhở & Điểm số -->
+    <rect x="735" y="445" width="175" height="42" rx="4" fill="#FFFFFF" stroke="#D1D5DB" stroke-width="1"/>
+    <text x="822" y="461" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" font-weight="bold" fill="#111827">BƯỚC 4: NHẮC &amp; CHẤM ĐIỂM</text>
+    <text x="822" y="476" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9" fill="#4B5563">Gù duy trì &gt; 5s: Rung nhắc lưng</text>
+
+    <line x1="515" y1="498" x2="895" y2="498" stroke="#E5E7EB" stroke-width="1"/>
+    <text x="710" y="516" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#1F2937">Kết quả hiển thị trực tiếp lên <tspan font-weight="bold">Điểm Tư Thế (0 - 100)</tspan> &amp; <tspan font-weight="bold">Mô hình 3D</tspan></text>
+  </g>
+
+</svg>

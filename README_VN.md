@@ -27,17 +27,40 @@
 
 </div>
 
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="33%">
+        <img src="docs/images/device_perspective.png" alt="Ảnh dựng 3D góc nghiêng" width="100%" /><br/>
+        <b>Mô Hình 3D Thiết Bị Đeo</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="docs/images/device_front.png" alt="Mặt trước thiết bị" width="100%" /><br/>
+        <b>Mặt Trước & Nút Bấm Xúc Giác</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="docs/images/device_side_clip.png" alt="Mặt bên và kẹp áo" width="100%" /><br/>
+        <b>Kẹp Gài Áo & Cổng Sạc USB-C</b>
+      </td>
+    </tr>
+  </table>
+</div>
+
 ---
 
-> ### 📚 TÀI LIỆU KỸ THUẬT CHUYÊN SÂU (TECHNICAL DOCUMENTATION)
-> 1. **Kiến Trúc Phần Mềm & Luồng Chương Trình**: [`docs/software_architecture.md`](docs/software_architecture.md)  
+> ### 📚 TÀI LIỆU KỸ THUẬT CHUYÊN SÂU & HƯỚNG DẪN HỆ THỐNG
+> 1. **Kiến Trúc Phần Mềm & Luồng Chương Trình**: [`docs/software_architecture.md`](docs/software_architecture.md) | [**Tài Liệu PDF**](docs/software_block_diagram.pdf)  
 >    *Phân tầng module, FSM 6 trạng thái, Sequence Diagram, Dual-OTA Anti-Bricking, Web Monitor Engine.*
-> 2. **Sơ Đồ Phần Cứng & Kết Nối Mạch**: [`docs/hardware_schematic.md`](docs/hardware_schematic.md)  
+> 2. **Sơ Đồ Phần Cứng & Kết Nối Mạch**: [`docs/hardware_schematic.md`](docs/hardware_schematic.md) | [**Tài Liệu PDF**](docs/hardware_block_diagram.pdf)  
 >    *Sơ đồ khối, sơ đồ nguyên lý mạch, bảng phân bổ chân ESP32-C3 / Classic, linh kiện MOSFET/BJT/Diode.*
-> 3. **Cơ Sở Lý Thuyết & Phương Pháp Tính Toán**: [`docs/theoretical_basis.md`](docs/theoretical_basis.md)  
+> 3. **Cơ Sở Lý Thuyết & Phương Pháp Tính Toán**: [`docs/theoretical_basis.md`](docs/theoretical_basis.md) | [**Tài Liệu PDF**](docs/theoretical_basis.pdf)  
 >    *Cơ sinh học cột sống, chứng minh đồng pha vi phân bộ lọc bù $\frac{d\theta}{dt} = +g_y$, tích phân Yaw, 3D Kinematics.*
-> 4. **Hướng Dẫn Sử Dụng & Vận Hành**: [`docs/user_manual.md`](docs/user_manual.md)  
+> 4. **Hướng Dẫn Sử Dụng & Vận Hành**: [`docs/user_manual.md`](docs/user_manual.md) | [**Tài Liệu PDF**](docs/user_manual.pdf) | [**Tài Liệu Word DOCX**](docs/user_manual.docx)  
 >    *Hướng dẫn đeo máy, mã đèn LED chẩn đoán, thao tác nút bấm Tare/Snooze, kết nối Wi-Fi Web Monitor.*
+> 5. **Hướng Dẫn Cấu Trúc Mã Nguồn Arduino**: [`docs/arduino_code_guide.md`](docs/arduino_code_guide.md) | [**Tài Liệu PDF**](docs/arduino_code_guide.pdf)  
+>    *Giải thích phân khối 5 module độc lập, nguyên tắc hoạt động không nghẽn với biến đếm millis().*
+> 6. **Sơ Đồ Đồ Họa Vector SVG**:  
+>    • [Kiến Trúc Phần Cứng](docs/images/hardware_block_diagram.svg) • [Lưu Đồ Phần Mềm](docs/images/software_block_diagram.svg) • [Động Học Cơ Sinh](docs/images/biomechanics_diagram.svg) • [Phân Khối Arduino](docs/images/arduino_architecture_diagram.svg)
 
 ---
 
@@ -61,6 +84,11 @@ Cảm biến được gắn dọc theo cột sống ngực trên (đốt sống 
                 | /
                 +------> X (Trục ngang hai vai)
 ```
+
+<div align="center">
+  <img src="docs/images/biomechanics_diagram.svg" width="92%" alt="Hệ tọa độ cơ sinh học và động học cột sống" /><br/>
+  <em>Hình: Hệ tọa độ cơ sinh học, góc gập lưng (Flexion) và góc nghiêng vai (Lateral tilt)</em>
+</div>
 
 ### 2.1 Tính Góc Nghiêng Từ Trọng Trường
 
@@ -121,10 +149,15 @@ Thiết bị chỉ kết luận tư thế sai khi và chỉ khi $e_k > \theta_{\
              | N-MOSFET   |                            | NPN BJT    |
              | AO3400     |                            | S8050      |
              +-----+------+                            +-----+------+
-                   |                                         |
-            [ Motor Rung ]                            [ Còi Chip ]
-            [ + 1N5819   ]                            [ + Trở 1k ]
+                    |                                         |
+             [ Motor Rung ]                            [ Còi Chip ]
+             [ + 1N5819   ]                            [ + Trở 1k ]
 ```
+
+<div align="center">
+  <img src="docs/images/hardware_block_diagram.svg" width="95%" alt="Sơ đồ khối phần cứng" /><br/>
+  <em>Hình: Sơ đồ liên kết các khối phần cứng, đường nguồn và cách ly ngoại vi</em>
+</div>
 
 ### 3.2 Hướng Dẫn An Toàn Điện
 - **Bảo Vệ Xung Điện Cảm Từ Motor**: Tuyệt đối **không cấp điện trực tiếp từ chân GPIO ESP32-C3**. Bắt buộc dùng MOSFET kênh N (AO3400 / 2N7002), lắp song song ngược diode Schottky 1N5819 và tổ hợp tụ lọc $10\,\mu\text{F} \parallel 0.1\,\mu\text{F}$ để triệt tiêu sức điện động phản hồi (Back-EMF) làm reset chip.
@@ -175,6 +208,11 @@ posture-monitor/
 - [`storage_manager`](components/storage_manager/README_VN.md): Đọc/ghi cấu hình Flash NVS có mã kiểm tra CRC32.
 - [`button_ctrl`](components/button_ctrl/README_VN.md): Phân tách sự kiện bấm đơn, bấm đúp (snooze) và bấm giữ (tare).
 
+<div align="center">
+  <img src="docs/images/software_block_diagram.svg" width="92%" alt="Sơ đồ kiến trúc phần mềm" /><br/>
+  <em>Hình: Sơ đồ phân tầng kiến trúc phần mềm, tác vụ FreeRTOS và luồng điều phối sự kiện phi nghẽn</em>
+</div>
+
 ---
 
 ## 5. Máy Trạng Thái (FSM) & Cảnh Báo Lũy Tiến
@@ -210,7 +248,34 @@ stateDiagram-v2
 
 ---
 
-## 6. Cấu Hình Menuconfig
+## 6. Giao Diện Giám Sát Web Thời Gian Thực & Đo Từ Xa
+
+Hệ thống tích hợp sẵn máy chủ HTTP Server và giao diện Web Dashboard trực tiếp trên Wi-Fi Access Point của ESP32-C3, cho phép theo dõi dáng ngồi trực quan trên điện thoại hoặc máy tính mà không cần cài thêm app:
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="50%">
+        <img src="docs/images/web_monitor_mobile.png" alt="Giao diện Web tiếng Việt" width="280px" /><br/>
+        <b>Giao Diện Web Thời Gian Thực (Tiếng Việt)</b>
+      </td>
+      <td align="center" width="50%">
+        <img src="docs/images/web_monitor_mobile_en.png" alt="Giao diện Web tiếng Anh" width="280px" /><br/>
+        <b>Giao Diện Web Thời Gian Thực (English)</b>
+      </td>
+    </tr>
+  </table>
+</div>
+
+### Tính Năng Nổi Bật Trên Web:
+- **Mô Hình 3D Cột Sống Trực Quan**: Dựng khung xương 3D thời gian thực tương tác trực tiếp qua cảm ứng vuốt xoay góc nhìn, phóng to thu nhỏ.
+- **Dữ Liệu Đo Cơ Sinh Học**: Hiển thị góc cúi/ngửa (Roll), nghiêng vai (Pitch), xoay người (Yaw) và điểm tư thế (0 - 100).
+- **Cân Chỉnh Tư Thế & Tạm Dừng Từ Xa**: Nhấn nút Tare Calibrate hoặc Snooze 10 phút ngay trên trình duyệt điện thoại.
+- **Nạp Nâng Cấp Firmware Không Dây (OTA)**: Cập nhật file `.bin` trực tiếp qua Wi-Fi có kiểm tra mã băm an toàn SHA-256 và cơ chế chống brick Dual-Bank.
+
+---
+
+## 7. Cấu Hình Menuconfig
 
 Người dùng có thể tinh chỉnh toàn bộ các tham số kỹ thuật qua giao diện đồ họa bằng lệnh:
 
@@ -231,13 +296,13 @@ Vào mục **Posture Monitor Configuration**:
 
 ---
 
-## 7. Hướng Dẫn Cài Đặt & Nạp Firmware
+## 8. Hướng Dẫn Cài Đặt & Nạp Firmware
 
-### 7.1 Chuẩn Bị
+### 8.1 Chuẩn Bị
 - Máy tính đã cài đặt ESP-IDF v5.0 trở lên (`v5.5` khuyến nghị).
 - Cáp kết nối máy tính với cổng UART/USB của ESP32-C3.
 
-### 7.2 Biên Dịch & Nạp Mã Nguồn
+### 8.2 Biên Dịch & Nạp Mã Nguồn
 
 ```bash
 # 1. Kích hoạt môi trường ESP-IDF
@@ -253,14 +318,14 @@ idf.py build
 idf.py -p /dev/ttyUSB0 flash monitor
 ```
 
-### 7.3 Quy Trình Sử Dụng
+### 8.3 Quy Trình Sử Dụng
 1. **Đeo thiết bị**: Cố định thiết bị áp sát vùng lưng trên giữa hai xương bả vai (đốt sống T1–T4).
 2. **Hiệu chuẩn (Tare)**: Ngồi thẳng lưng chuẩn công thái học, nhấn giữ nút bấm trong $>2$ giây. Thiết bị sẽ rung 2 nhịp xác nhận góc chuẩn đã được lưu vào Flash NVS.
 3. **Tạm dừng (Snooze)**: Khi đứng dậy đi lại hoặc tập thể dục, nhấn đúp nút bấm để tạm dừng cảnh báo trong 10 phút.
 
 ---
 
-## 8. Kết Quả Đo Lường & Kiểm Thử
+## 9. Kết Quả Đo Lường & Kiểm Thử
 
 | Chỉ Số Đánh Giá | Giá Trị Thực Tế | Giới Hạn Cho Phép | Kết Luận |
 | :--- | :--- | :--- | :--- |
@@ -273,6 +338,6 @@ idf.py -p /dev/ttyUSB0 flash monitor
 
 ---
 
-## 9. Giấy Phép (License)
+## 10. Giấy Phép (License)
 
 Dự án phát hành theo giấy phép Apache License 2.0. Chi tiết xem tại tệp [LICENSE](LICENSE).

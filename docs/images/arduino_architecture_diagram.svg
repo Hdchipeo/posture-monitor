@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="100%" height="100%">
+  <defs>
+    <filter id="shadow" x="-3%" y="-4%" width="106%" height="110%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.06"/>
+    </filter>
+    <marker id="arrow-code" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#374151"/>
+    </marker>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="960" height="540" fill="#FFFFFF"/>
+  <rect x="12" y="12" width="936" height="516" rx="8" fill="#FAFAFA" stroke="#E5E7EB" stroke-width="1"/>
+
+  <!-- Diagram Title -->
+  <text x="480" y="44" text-anchor="middle" font-family="'Times New Roman', serif" font-size="17" font-weight="bold" fill="#111827">CẤU TRÚC VÀ CÁC THÀNH PHẦN CODE TRONG ARDUINO</text>
+  <text x="480" y="64" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12" fill="#6B7280">Sơ đồ phân chia module, vai trò và luồng tương tác trong chương trình</text>
+
+  <!-- ==================== KHỐI CHÍNH ĐIỀU PHỐI (TOP CENTER) ==================== -->
+  <g filter="url(#shadow)">
+    <rect x="180" y="88" width="600" height="135" rx="8" fill="#FFFFFF" stroke="#111827" stroke-width="2"/>
+    <rect x="180" y="88" width="600" height="28" rx="8" fill="#1F2937"/>
+    <rect x="180" y="106" width="600" height="10" fill="#1F2937"/>
+    <text x="480" y="107" text-anchor="middle" font-family="'Times New Roman', serif" font-size="13.5" font-weight="bold" fill="#FFFFFF">CHƯƠNG TRÌNH ĐIỀU PHỐI CHÍNH (posture_monitor.ino)</text>
+
+    <!-- Sub functions in columns -->
+    <rect x="200" y="126" width="175" height="82" rx="4" fill="#F9FAFB" stroke="#D1D5DB" stroke-width="1"/>
+    <text x="287" y="144" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#1F2937">1. Khởi tạo (setup)</text>
+    <text x="287" y="162" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Thiết lập chân phần cứng</text>
+    <text x="287" y="178" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Tự kiểm tra đèn LED (POST)</text>
+    <text x="287" y="194" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Tải mốc chuẩn từ bộ nhớ</text>
+
+    <rect x="392" y="126" width="175" height="82" rx="4" fill="#F9FAFB" stroke="#D1D5DB" stroke-width="1"/>
+    <text x="480" y="144" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#1F2937">2. Vòng lặp (loop)</text>
+    <text x="480" y="162" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Vận hành chu kỳ 50Hz (20ms)</text>
+    <text x="480" y="178" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Đọc góc &amp; chạy máy trạng thái</text>
+    <text x="480" y="194" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Xuất nhật ký chẩn đoán Serial</text>
+
+    <rect x="585" y="126" width="175" height="82" rx="4" fill="#F9FAFB" stroke="#D1D5DB" stroke-width="1"/>
+    <text x="672" y="144" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#1F2937">3. Nút bấm &amp; Đèn LED</text>
+    <text x="672" y="162" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Bấm 1 lần: Tắt rung nhanh</text>
+    <text x="672" y="178" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Bấm đúp: Tạm dừng 10 phút</text>
+    <text x="672" y="194" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Giữ 2 giây: Hiệu chuẩn mốc</text>
+  </g>
+
+  <!-- Connectors from Main to Lower Modules -->
+  <line x1="280" y1="223" x2="135" y2="280" stroke="#374151" stroke-width="1.8" marker-end="url(#arrow-code)"/>
+  <line x1="380" y1="223" x2="310" y2="280" stroke="#374151" stroke-width="1.8" marker-end="url(#arrow-code)"/>
+  <line x1="480" y1="223" x2="480" y2="280" stroke="#374151" stroke-width="1.8" marker-end="url(#arrow-code)"/>
+  <line x1="580" y1="223" x2="650" y2="280" stroke="#374151" stroke-width="1.8" marker-end="url(#arrow-code)"/>
+  <line x1="680" y1="223" x2="825" y2="280" stroke="#374151" stroke-width="1.8" marker-end="url(#arrow-code)"/>
+
+  <!-- ==================== HÀNG DƯỚI: 5 MODULE CHỨC NĂNG ==================== -->
+
+  <!-- Module 1: Config.h -->
+  <g filter="url(#shadow)">
+    <rect x="35" y="286" width="160" height="225" rx="6" fill="#FFFFFF" stroke="#4B5563" stroke-width="1.5"/>
+    <rect x="35" y="286" width="160" height="26" rx="6" fill="#374151"/>
+    <rect x="35" y="304" width="160" height="8" fill="#374151"/>
+    <text x="115" y="304" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12" font-weight="bold" fill="#FFFFFF">CẤU HÌNH (Config.h)</text>
+
+    <text x="115" y="332" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#1F2937">Khai Báo Cố Định</text>
+    <text x="115" y="352" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Sơ đồ chân cắm I/O</text>
+    <text x="115" y="370" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Nhận diện chip tự động</text>
+    <text x="115" y="388" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Ngưỡng góc gù (15°)</text>
+    <text x="115" y="406" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Thời gian đệm trễ (5s)</text>
+    <text x="115" y="424" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Bật / tắt âm thanh còi</text>
+
+    <line x1="45" y1="440" x2="185" y2="440" stroke="#E5E7EB" stroke-width="1"/>
+    <text x="115" y="465" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9.5" fill="#1F2937" font-weight="bold">Vai trò:</text>
+    <text x="115" y="482" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9" fill="#4B5563">Quản lý toàn bộ thông số</text>
+    <text x="115" y="496" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9" fill="#4B5563">tập trung tại một nơi</text>
+  </g>
+
+  <!-- Module 2: MPU6050Driver -->
+  <g filter="url(#shadow)">
+    <rect x="210" y="286" width="165" height="225" rx="6" fill="#FFFFFF" stroke="#4B5563" stroke-width="1.5"/>
+    <rect x="210" y="286" width="165" height="26" rx="6" fill="#374151"/>
+    <rect x="210" y="304" width="165" height="8" fill="#374151"/>
+    <text x="292" y="304" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12" font-weight="bold" fill="#FFFFFF">ĐỌC CẢM BIẾN</text>
+
+    <text x="292" y="332" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#1F2937">MPU6050Driver</text>
+    <text x="292" y="352" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Giao tiếp cảm biến</text>
+    <text x="292" y="370" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Đọc góc chuyển động</text>
+    <text x="292" y="388" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Tự khôi phục khi nghẽn</text>
+    <text x="292" y="406" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Kiểm tra kết nối</text>
+    <text x="292" y="424" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Chế độ ngủ tiết kiệm pin</text>
+
+    <line x1="220" y1="440" x2="365" y2="440" stroke="#E5E7EB" stroke-width="1"/>
+    <text x="292" y="465" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9.5" fill="#1F2937" font-weight="bold">Vai trò:</text>
+    <text x="292" y="482" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9" fill="#4B5563">Cung cấp dữ liệu đo</text>
+    <text x="292" y="496" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9" fill="#4B5563">chính xác, ổn định</text>
+  </g>
+
+  <!-- Module 3: PostureCore -->
+  <g filter="url(#shadow)">
+    <rect x="390" y="286" width="180" height="225" rx="6" fill="#FFFFFF" stroke="#111827" stroke-width="2"/>
+    <rect x="390" y="286" width="180" height="26" rx="6" fill="#1F2937"/>
+    <rect x="390" y="304" width="180" height="8" fill="#1F2937"/>
+    <text x="480" y="304" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12" font-weight="bold" fill="#FFFFFF">XỬ LÝ TƯ THẾ</text>
+
+    <text x="480" y="332" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#1F2937">PostureCore (Lõi máy)</text>
+    <text x="480" y="352" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Tính 3 góc: Cúi, Nghiêng, Xoay</text>
+    <text x="480" y="370" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Lọc chống rung ảo do nhịp thở</text>
+    <text x="480" y="388" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Quản lý 6 trạng thái tư thế</text>
+    <text x="480" y="406" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Bộ đệm trễ 5 giây thông minh</text>
+    <text x="480" y="424" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Chấm điểm tư thế (0 - 100)</text>
+
+    <line x1="400" y1="440" x2="560" y2="440" stroke="#E5E7EB" stroke-width="1"/>
+    <text x="480" y="465" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9.5" fill="#1F2937" font-weight="bold">Vai trò:</text>
+    <text x="480" y="482" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9" fill="#4B5563">"Bộ não" phân tích dáng</text>
+    <text x="480" y="496" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9" fill="#4B5563">và ra quyết định cảnh báo</text>
+  </g>
+
+  <!-- Module 4: ActuatorManager -->
+  <g filter="url(#shadow)">
+    <rect x="585" y="286" width="165" height="225" rx="6" fill="#FFFFFF" stroke="#4B5563" stroke-width="1.5"/>
+    <rect x="585" y="286" width="165" height="26" rx="6" fill="#374151"/>
+    <rect x="585" y="304" width="165" height="8" fill="#374151"/>
+    <text x="667" y="304" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12" font-weight="bold" fill="#FFFFFF">ĐIỀU KHIỂN BÁO</text>
+
+    <text x="667" y="332" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#1F2937">ActuatorManager</text>
+    <text x="667" y="352" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Điều khiển motor rung</text>
+    <text x="667" y="370" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Điều khiển còi âm thanh</text>
+    <text x="667" y="388" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Xử lý nhịp không nghẽn</text>
+    <text x="667" y="406" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Rung nhẹ nhắc nhở cấp 1</text>
+    <text x="667" y="424" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Rung mạnh + còi cấp 2</text>
+
+    <line x1="595" y1="440" x2="740" y2="440" stroke="#E5E7EB" stroke-width="1"/>
+    <text x="667" y="465" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9.5" fill="#1F2937" font-weight="bold">Vai trò:</text>
+    <text x="667" y="482" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9" fill="#4B5563">Thực thi hành động rung</text>
+    <text x="667" y="496" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9" fill="#4B5563">mà không làm đứng máy</text>
+  </g>
+
+  <!-- Module 5: StorageManager -->
+  <g filter="url(#shadow)">
+    <rect x="765" y="286" width="160" height="225" rx="6" fill="#FFFFFF" stroke="#4B5563" stroke-width="1.5"/>
+    <rect x="765" y="286" width="160" height="26" rx="6" fill="#374151"/>
+    <rect x="765" y="304" width="160" height="8" fill="#374151"/>
+    <text x="845" y="304" text-anchor="middle" font-family="'Times New Roman', serif" font-size="12" font-weight="bold" fill="#FFFFFF">LƯU TRỮ BỘ NHỚ</text>
+
+    <text x="845" y="332" text-anchor="middle" font-family="'Times New Roman', serif" font-size="11" font-weight="bold" fill="#1F2937">StorageManager</text>
+    <text x="845" y="352" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Ghi nhớ vào Flash NVS</text>
+    <text x="845" y="370" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Lưu mốc dáng chuẩn</text>
+    <text x="845" y="388" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Lưu các ngưỡng rung</text>
+    <text x="845" y="406" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Kiểm tra toàn vẹn mã</text>
+    <text x="845" y="424" text-anchor="middle" font-family="'Times New Roman', serif" font-size="10" fill="#4B5563">• Không mất khi hết pin</text>
+
+    <line x1="775" y1="440" x2="915" y2="440" stroke="#E5E7EB" stroke-width="1"/>
+    <text x="845" y="465" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9.5" fill="#1F2937" font-weight="bold">Vai trò:</text>
+    <text x="845" y="482" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9" fill="#4B5563">Bảo toàn cài đặt cá nhân</text>
+    <text x="845" y="496" text-anchor="middle" font-family="'Times New Roman', serif" font-size="9" fill="#4B5563">qua các lần tắt/bật máy</text>
+  </g>
+
+</svg>

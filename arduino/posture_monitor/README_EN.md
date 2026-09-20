@@ -3,6 +3,12 @@
 ## 1. Overview
 This directory contains the standalone Arduino-compatible version of the Posture Monitor system. It is designed to compile directly in **Arduino IDE** or **PlatformIO** with **zero external library dependencies** (all sensor communication is handled natively via `Wire.h`).
 
+> ### 📚 ARDUINO SOURCE CODE GUIDE
+> Detailed breakdown of modules, pin configurations, algorithm flow, and non-blocking timing:
+> - **Markdown Guide**: [`docs/arduino_code_guide.md`](../../docs/arduino_code_guide.md)
+> - **Printable PDF Guide**: [`docs/arduino_code_guide.pdf`](../../docs/arduino_code_guide.pdf)
+> - **Architecture Vector Diagram**: [`docs/images/arduino_architecture_diagram.svg`](../../docs/images/arduino_architecture_diagram.svg)
+
 ## 2. Hardware Support & Automatic Pin Selection
 The sketch automatically detects the active board target at compile time:
 

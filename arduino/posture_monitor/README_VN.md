@@ -3,6 +3,12 @@
 ## 1. Tổng Quan
 Thư mục này chứa toàn bộ mã nguồn phiên bản Arduino cho hệ thống Giám sát & Cảnh báo tư thế ngồi. Mã nguồn được thiết kế chạy trực tiếp trên **Arduino IDE** hoặc **PlatformIO** mà **không cần cài đặt bất kỳ thư viện ngoài nào** (toàn bộ giao tiếp I2C MPU6050 được xử lý trực tiếp qua `Wire.h`).
 
+> ### 📚 TÀI LIỆU GIẢI THÍCH MÃ NGUỒN ARDUINO
+> Chi tiết cấu trúc từng module, khai báo chân, thuật toán và nguyên tắc vận hành phi nghẽn:
+> - **Tài liệu Markdown**: [`docs/arduino_code_guide.md`](../../docs/arduino_code_guide.md)
+> - **Tài liệu PDF (In ấn & Lưu trữ)**: [`docs/arduino_code_guide.pdf`](../../docs/arduino_code_guide.pdf)
+> - **Sơ đồ phân khối kiến trúc**: [`docs/images/arduino_architecture_diagram.svg`](../../docs/images/arduino_architecture_diagram.svg)
+
 ## 2. Hỗ Trợ Phần Cứng & Tự Động Gán Chân
 Hệ thống tự động nhận diện loại chip khi chọn board trong Arduino IDE:
 
